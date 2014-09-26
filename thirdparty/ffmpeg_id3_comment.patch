@@ -1,0 +1,98 @@
+diff --git a/libavformat/id3v2.c b/libavformat/id3v2.c
+index 5469e0a..756dce0 100644
+--- a/libavformat/id3v2.c
++++ b/libavformat/id3v2.c
+@@ -66,6 +66,7 @@ const AVMetadataConv ff_id3v2_4_metadata_conv[] = {
+     { "TSOA", "album-sort"    },
+     { "TSOP", "artist-sort"   },
+     { "TSOT", "title-sort"    },
++               { "COMM", "comment"       },
+     { 0 }
+ };
+ 
+diff --git a/libavformat/id3v2enc.c b/libavformat/id3v2enc.c
+index 8b804c4..9fede5c 100644
+--- a/libavformat/id3v2enc.c
++++ b/libavformat/id3v2enc.c
+@@ -43,7 +43,7 @@ static int string_is_ascii(const uint8_t *str)
+     return !*str;
+ }
+ 
+-static void id3v2_encode_string(AVIOContext *pb, const uint8_t *str,
++static void id3v2_encode_string(AVIOContext *pb, const uint8_t *str, 
+                                enum ID3v2Encoding enc)
+ {
+     int (*put)(AVIOContext*, const char*);
+@@ -57,6 +57,51 @@ static void id3v2_encode_string(AVIOContext *pb, const uint8_t *str,
+     put(pb, str);
+ }
+ 
++
++/**
++ * Write a comment frame with one.
++ * according to encoding (only UTF-8 or UTF-16+BOM supported).
++ * @return number of bytes written or a negative error code.
++ */
++static int id3v2_put_comment_tag( 
++  ID3v2EncContext *id3, 
++  AVIOContext *avioc, 
++	const char *str, 
++	uint32_t tag, 
++	enum ID3v2Encoding enc )
++{
++    int len;
++    uint8_t *pb;
++    AVIOContext *dyn_buf;
++    if( avio_open_dyn_buf( &dyn_buf ) < 0 ) { 
++        return AVERROR( ENOMEM );
++		}
++		
++    /* check if the strings are ASCII-only and use UTF16 only if
++     * they're not */
++    if( enc == ID3v2_ENCODING_UTF16BOM && string_is_ascii( str ) ) {
++        enc = ID3v2_ENCODING_ISO8859;
++		}
++		
++    avio_w8( dyn_buf, enc );
++		id3v2_encode_string( dyn_buf, "eng", enc );
++		//avio_w8( dyn_buf, 0 );
++		id3v2_encode_string( dyn_buf, str, enc );
++		len = avio_close_dyn_buf( dyn_buf, &pb );
++		
++		avio_wb32( avioc, tag );
++    /* ID3v2.3 frame size is not synchsafe */
++    if( id3->version == 3 ) {
++        avio_wb32( avioc, len );
++    } else {
++        id3v2_put_size( avioc, len );
++		}
++    avio_wb16( avioc, 0 );
++    avio_write( avioc, pb, len );
++    av_freep( &pb );
++    return len + ID3v2_HEADER_SIZE;
++}
++
+ /**
+  * Write a text frame with one (normal frames) or two (TXXX frames) strings
+  * according to encoding (only UTF-8 or UTF-16+BOM supported).
+@@ -102,8 +147,18 @@ static int id3v2_check_write_tag(ID3v2EncContext *id3, AVIOContext *pb, AVDictio
+     uint32_t tag;
+     int i;
+ 
+-    if (t->key[0] != 'T' || strlen(t->key) != 4)
+-        return -1;
++		if( strlen( t->key ) != 4 ) {
++			return -1;
++		}
++		
++		if( t->key[0] != 'T' ) {
++			if( av_strcasecmp( t->key, "comm" ) ) {
++				return -1;
++			} 
++			tag = AV_RB32( t->key );
++			return id3v2_put_comment_tag( id3, pb, t->value, tag, enc );
++		}
++		
+     tag = AV_RB32(t->key);
+     for (i = 0; *table[i]; i++)
+         if (tag == AV_RB32(table[i]))

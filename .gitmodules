@@ -1,0 +1,7 @@
+[submodule "thirdparty/x264"]
+	path = thirdparty/x264
+	url = git://git.videolan.org/x264.git
+	branch = stable
+[submodule "thirdparty/ffmpeg"]
+	path = thirdparty/ffmpeg
+	url = git://source.ffmpeg.org/ffmpeg.git

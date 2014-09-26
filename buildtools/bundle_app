@@ -1,0 +1,443 @@
+#!/usr/bin/env python
+
+Info_plist = """
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>English</string>
+  <key>CFBundleExecutable</key>
+  <string>%%EXECUTABLE%%</string>
+  <key>CFBundleGetInfoString</key>
+  <string>%%INFO%%</string>
+  <key>CFBundleIconFile</key>
+  <string>%%ICON%%</string>
+  <key>CFBundleIdentifier</key>
+  <string>%%MAIN_CLASS%%</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>%%NAME%%</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleSignature</key>
+  <string>%%SIGNATURE%%</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string> 
+%%DOCUMENT_TYPES%%
+
+  <key>Java</key>
+  <dict>
+    <key>Arguments</key>
+    %%APP_ARGS%%
+    <key>ClassPath</key>
+    %%CLASS_PATH%%
+    <key>JVMVersion</key>
+    <string>1.6+</string>
+    <key>MainClass</key>
+    <string>%%MAIN_CLASS%%</string>
+    <key>VMOptions</key>
+    %%JVM_ARGS%%
+    <key>WorkingDirectory</key>
+    <string>$APP_PACKAGE/Contents/Resources</string>
+  </dict>
+   
+</dict>
+</plist>          
+"""
+
+import sys,os
+import shutil
+import re
+from optparse import OptionParser
+from sets import Set
+
+parser = OptionParser()
+
+parser.add_option('-w','--overwrite', dest='overwrite', action='store_true',
+                  help='overwrite an existing destination bundle - use with caution')
+
+parser.add_option('-r','--resource', dest='resources', action='append', type='string',
+                  help='specify a file/directory to be include in the Resources bundle dir')
+
+parser.add_option('-i', '--icon', dest='icon', action='store', default='appIcon.icns',
+                  help='specify application icon.  Default icon is "appIcon.icns"')
+                  
+parser.add_option('-n', '--name', dest='name', action='store',
+                  help='specify bundle name.  Default name is based on location.')
+
+parser.add_option('-p', '--plist', dest='plist', action='store',
+				  help='specify existing plist if you do not wish one to be automatically generated.')
+
+parser.add_option('-s','--stub', dest='stub', action='store', type='string', 
+                  help='specify an existing launch stub.  By default, it is assumed a "JavaApplicationStub" binary is located in current directory.')
+
+parser.add_option('-g','--signature', dest='signature', action='store', type='string', default='????',
+                  help='specify app signature.  Default is "????"')
+
+parser.add_option('-c', '--makescript', dest='make_script', action='store_true',
+                  help='creates a script to use as the stub')
+
+parser.add_option('--noautopath', dest='no_auto_path', action='store_true',
+                  help='prevents resource jar files from being automatically added to the JVM classpath, and jnilib files from being added to libpath.')
+
+parser.add_option('-C', '--classpath', dest='classpath', action='append', type='string',
+                  help='adds a path to JVM classpath.  Jar files are automatically added unless --noautoclasspath is specified.')
+
+parser.add_option('-L', '--libpath', dest='libpath', action='append', type='string',
+                  help='adds a path to JVM java.library.path property.')
+
+parser.add_option('-A', '--apparg', dest='appargs', action='append', type='string',
+                  help='adds an argument to pass to application executable.')
+
+parser.add_option('-J', '--jvmarg', dest='jvmargs', action='append', type='string',
+                  help='adds an argument to pass to the JVM.')
+                  
+parser.add_option('-D', '--doctype', dest='doctypes', action='append', type='string',
+                  help='adds document type to be associated with application bundle.')
+
+
+
+(options,args) = parser.parse_args()
+
+if len(args) < 2:
+    print >>sys.stderr,'need to specify a main class and a name/destination'
+    sys.exit(1)
+
+
+
+def copytree(src, dst, symlinks=0,exclude=[]):
+# Copies file tree recursively.
+    names = os.listdir(src)
+    os.mkdir(dst)
+    for name in names:
+        if name in exclude:
+            continue
+        srcname = os.path.join(src, name)
+        dstname = os.path.join(dst, name)
+        try:
+            if symlinks and os.path.islink(srcname):
+                linkto = os.readlink(srcname)
+                os.symlink(linkto, dstname)
+            elif os.path.isdir(srcname):
+                copytree(srcname, dstname, symlinks,exclude)
+            else:
+                shutil.copy2(srcname, dstname)
+        except (IOError, os.error), why:
+            print "Can't copy %s to %s: %s" % (`srcname`, `dstname`, str(why))
+
+
+
+def copy_resources(resources, target_dir):
+    for r in resources:
+        while r.endswith(os.path.sep):
+            r = r[:-1]
+        if not os.path.exists(r):
+            print >>sys.stderr,'Warning: resource',r,'does not exist'
+        else:
+            try:
+                if os.path.isfile(r):
+                    shutil.copy(r,target_dir)
+                else:
+                    copytree(r,os.path.join(target_dir,os.path.basename(r)),True,['.svn'])
+            except shutil.Error,val:
+                print >>sys.stderr,'copying resource',r,'produced error',val[0][0][2]
+
+
+
+def find_files(path, pattern):
+#Finds files recursively.
+	while path.endswith(os.path.sep):
+		path = path[:-1]
+	
+	def file_filter(out_list, dirname, names):
+		for name in names:
+			if pattern.match(name):
+				fullpath = os.path.join(dirname, name)
+				if os.path.isfile(fullpath):
+					out_list.append(fullpath[path.__len__() + 1:])
+	
+	file_list = []
+	os.path.walk(path, file_filter, file_list)
+	return file_list
+
+
+
+def create_classpath(options, resource_path):
+	cp = Set()
+	if options.classpath:
+		for p in options.classpath:
+			cp.add(p)			
+	if not options.no_auto_path:
+		pat = re.compile('.*\.jar', re.IGNORECASE)
+		for p in find_files(resource_path, pat):
+			if not p.endswith('-src.jar'):
+				cp.add(p)			
+	return cp
+
+
+
+def create_libpath(options, resource_path):
+	lp = Set()
+	if options.libpath:
+		for p in options.libpath:
+			lp.add(p)
+	if not options.no_auto_path:
+		pat = re.compile('.*\.(jnilib|so|dll)', re.IGNORECASE)
+		for p in find_files(resource_path, pat):
+			lp.add(os.path.dirname(p))
+	return lp
+
+
+
+def join_paths(paths):
+	ret = 0
+	if not paths:
+		return ret
+	for p in paths:
+		if ret:
+			ret = ret + os.path.pathsep + p
+		else:
+			ret = p
+	return ret
+	
+	
+	
+def make_xml_array(args):
+	if not args:
+		return '<array/>'
+	ret = '<array>\n'
+	for a in args:
+		ret = ret + '<string>' + a + '</string>\n'
+	ret = ret + '</array>\n'	
+	return ret
+		
+
+
+def create_signature(options):
+	if options.signature:
+		return 'APPL' + options.signature
+	
+	return 'APPL????'
+
+
+def create_document_types(options):
+    if not options.doctypes:
+        return '';
+        
+    ret =       '  <key>CFBundleDocumentTypes</key>\n'
+    ret = ret + '  <array>\n'
+    
+    for d in options.doctypes:
+        dd = d.split('|')
+                
+        ret = ret + '    <dict>\n'
+        ret = ret + '      <key>CFBundleTypeExtensions</key>\n'
+        ret = ret + '      <array>\n'
+        for ext in dd[0].split(','):
+            ret = ret + '        <string>' + ext + '</string>\n'
+        ret = ret + '      </array>\n'
+        
+        if len(dd) > 1 and len(dd[1]) > 0:
+            ret = ret + '      <key>CFBundleTypeIconFile</key>\n'
+            ret = ret + '      <string>' + dd[1] + '</string>\n'
+        
+        if len(dd) > 2 and len(dd[2]) > 0:
+            ret = ret + '      <key>CFBundleTypeName</key>\n'
+            ret = ret + '      <string>' + dd[2] + '</string>\n'
+        
+        ret = ret + '      <key>CFBundleTypeRole</key>\n'
+        if len(dd) > 3 and len(dd[3]) > 0:
+            ret = ret + '      <string>' + dd[3] + '</string>\n'
+        else:
+            ret = ret + '      <string>Viewer</string>\n'
+        
+        if len(dd) > 4 and len(dd[4]) > 0:
+            ret = ret + '      <key>NSDocumentClass</key>\n'
+            ret = ret + '      <string>' + dd[4] + '</string>\n'
+
+        ret = ret + '    </dict>\n'
+    
+    ret = ret + '  </array>\n'
+    return ret
+    
+
+	
+
+def make_plist(options, name, main_class, resource_path, stub_path, icon_path, plist_path):
+	txt = Info_plist;
+	txt = txt.replace('%%EXECUTABLE%%', os.path.basename(stub_path))
+	txt = txt.replace('%%MAIN_CLASS%%', main_class)
+	txt = txt.replace('%%NAME%%', name)
+	txt = txt.replace('%%INFO%%', name)
+	txt = txt.replace('%%ICON%%', os.path.basename(icon_path))
+	txt = txt.replace('%%SIGNATURE%%', create_signature(options))
+	txt = txt.replace('%%DOCUMENT_TYPES%%', create_document_types(options))
+	txt = txt.replace('%%APP_ARGS%%', make_xml_array(options.appargs))
+	txt = txt.replace('%%CLASS_PATH%%', make_xml_array(create_classpath(options, resource_path)))
+
+	jvmargs = options.jvmargs
+	if not jvmargs:
+		jvmargs = []
+	
+	libpath = join_paths(create_libpath(options, resource_path))
+	
+	if libpath:
+		jvmargs.append('-Djava.library.path=' + libpath)
+
+	txt = txt.replace('%%JVM_ARGS%%', make_xml_array(jvmargs))
+	
+	f = open(plist_file,'w')
+	f.write(txt)
+	f.close()
+			
+	
+	
+
+def make_script(options, main_class, resource_path, icon_path, script_path):
+# Generates shell script to use in place of application stub.
+	out_file = open(script_path, 'w')
+	out_file.write('#!/bin/sh\n\n')
+	out_file.write('START=`dirname "$0"`\n')
+	out_file.write('JAVA="/usr/bin/java"\n')
+	out_file.write('CLASSPATH="')
+
+	p = join_paths(create_classpath(options, resource_path))
+	if p:
+		out_file.write(p)
+
+	out_file.write('"\nLIBPATH="')
+	
+	p = join_paths(create_libpath(options, resource_path))
+	if p:
+		out_file.write('-Djava.library.path=' + p)
+		out_file.write('-Djna.library.path=' + p)
+
+	out_file.write('"\nJAVA_FLAGS="')
+
+	if os.path.exists(icon_path):
+		out_file.write('-Xdock:icon=' + os.path.basename(icon_path) + ' ')
+        
+	if options.jvmargs:
+		for r in options.jvmargs:
+			out_file.write(r)
+			out_file.write(' ')
+
+	out_file.write('"\nMAIN_CLASS="' + main_class)
+	out_file.write('"\nAPP_ARGS="')
+	if options.appargs:
+		for r in options.appargs:
+			out_file.write(r)
+			out_file.write(' ')
+	    
+	out_file.write('"\n\n')
+	out_file.write('cd "$START/../Resources"\n')
+	out_file.write('$JAVA -classpath $CLASSPATH $LIBPATH $JAVA_FLAGS $MAIN_CLASS $APP_ARGS\n')
+	out_file.close()
+
+
+
+
+
+main_class = args[0]
+dest       = args[1]
+
+while dest[-1] == '/':
+    dest = dest[:-1]
+
+if options.name:
+    name = options.name
+else:
+    name = os.path.splitext(os.path.basename(dest))[0];
+
+
+#Create necessary directories   
+if os.path.splitext(dest)[1] != '.app':
+    dest += '.app'
+    
+if os.path.exists(dest):
+    if not options.overwrite:
+        print >>sys.stderr, dest, 'exists, specify --overwrite/-w to force overwrite'
+	sys.exit(1)
+    else:
+        print 'overwrite specified, removing existing', dest, '...'
+        shutil.rmtree(dest)
+
+content_path   = os.path.join(dest,'Contents')
+resource_path  = os.path.join(content_path,'Resources')
+macos_path     = os.path.join(content_path,'MacOS')
+
+try:
+	os.makedirs(content_path)
+	os.makedirs(resource_path)
+	os.makedirs(macos_path)
+except Exception,val:
+    print >>sys.stderr,'error in creating bundle dirs/files for',dest + ': ',val
+    sys.exit(1)
+
+
+# Copy resource files
+if options.resources:
+    copy_resources(options.resources, resource_path)
+
+
+# Insert icon
+icon_file = os.path.join(resource_path, os.path.basename(options.icon))
+if not os.path.exists(options.icon):
+    print >>sys.stderr,'Warning: application icon',options.icon,'does not exist'
+else:        
+    shutil.copy(options.icon, icon_file)
+
+
+# Insert stub
+stub_source = 0;
+stub_file = 0
+
+if options.stub:
+	stub_source = options.stub
+
+if options.make_script:
+	script_file = os.path.join(macos_path, name)
+	make_script(options, main_class, resource_path, icon_file, script_file)
+	os.chmod(script_file, 0755)
+	if not stub_source:
+		stub_file = script_file
+
+if not stub_file:
+	if not stub_source:
+		stub_source = 'JavaApplicationStub'
+	if not os.path.exists(stub_source):
+		print >>sys.stderr,'stub file',stub_source,'does not exist.'
+		sys.exit(1)
+	stub_file = os.path.join(macos_path, os.path.basename(stub_source))
+	shutil.copy(stub_source, stub_file)
+
+
+# Create plist
+signature = 'APPL' + options.signature
+plist_file = os.path.join(content_path, 'Info.plist')
+
+if options.plist:
+	if not os.path.exists(options.plist):
+		print >>sys.stderr,'source plist',options.plist,'does not exist'
+		sys.exit(1)
+	shutil.copy(options.plist, plist_file)
+else:
+	make_plist(options, name, main_class, resource_path, stub_file, icon_file, plist_file)
+
+
+# Create pkginfo file
+pkginfo_file = os.path.join(content_path, 'PkgInfo')
+f = open(pkginfo_file,'w')
+f.write(signature)
+f.close()
+
+
+# Set directory flag so that the directory is recognized as an app bundle.
+if not os.path.exists('/Developer/Tools/SetFile'):
+	print >>sys.stderr,'Warning: Developer/Tools/SetFile does not exist.'
+else:
+	os.system('/Developer/Tools/SetFile -a B ' + dest.replace(' ', '\\ '))

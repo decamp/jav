@@ -1,0 +1,126 @@
+#!/usr/bin/env python
+
+# Module for changing install names of libraries.
+
+import os
+import sys
+import subprocess
+import re
+
+def read_link_paths( lib ):
+    # Returns list of all links of a dynamic library. 
+    # The first entry will be the install name of the library itself.
+    proc = subprocess.Popen( ['otool', '-L', lib], stdout=subprocess.PIPE )
+    pat = re.compile( '\S+' )
+    ret = []
+    
+    # Skip first line.    
+    proc.stdout.readline()
+            
+    while True:
+        line = proc.stdout.readline()
+        mo   = pat.search( line )
+        if mo == None:
+            break;
+            
+        ret.append( mo.group(0) )
+        
+    return ret
+    
+
+def change_install_paths( dir, newPath, removeVersion=False ):
+    # Alters the install path directories of all libraries in a specified directory, 
+    # and updates all links shared between those libraries.
+    
+    # Find dynamic libraries.
+    dir   = os.path.abspath( dir )
+    pat   = re.compile( '.*\.(dylib|jnilib|so|dll)$', re.IGNORECASE )
+
+    if os.path.isfile( dir ) :
+        names = [ os.path.basename( dir ) ]
+        dir = os.path.dirname( dir )
+    else:
+        names = filter( pat.match, os.listdir( dir ) )
+    
+    # Build map of the links of each library.
+    linkMap = {}
+    for name in names:
+        f = os.path.join( dir, name )
+        if os.path.islink( f ):
+            linkMap[name] = []
+        else:
+            linkMap[name] = read_link_paths( f )
+        if removeVersion:
+            name = _remove_version( name )
+            if not linkMap.has_key( name ):
+                linkMap[name] = []
+
+    #Replace paths of each file.
+    for name in linkMap.keys():
+        links = linkMap[name]
+        f = os.path.join( dir, name )
+        
+        if len( links ) == 0:
+            continue
+            
+        if removeVersion:
+            name = _remove_version( name )
+        
+        _change_install_path( f, os.path.join( newPath, name ) )
+
+        for linkPath in links[1:]:
+            srcLib = _file_name( linkPath )
+            
+            if removeVersion:
+                dstLib = _remove_version( srcLib )
+            else:
+                dstLib = srcLib
+
+            if not linkMap.has_key( dstLib ):
+                continue
+            
+            _change_link_path( f, linkPath, os.path.join( newPath, dstLib ) )
+    
+
+def _file_name( path ):
+    n = path.rfind( os.sep )
+    return path[n+1:]
+
+
+def _remove_version( name ):
+    ## Remove components of name surrounded by periods that contain only digits.
+    pat = re.compile( '^\\d+$' )
+    
+    while True:
+        n1 = name.rfind( '.' )
+        if n1 < 0: break
+        n0 = name.rfind( '.', 0, n1 - 1 )
+        if n0 < 0: break
+        if pat.match( name[n0+1:n1] ) == None : break
+        name = name[:n0] + name[n1:]
+    return name
+        
+
+def _change_link_path( file, fromPath, toPath ):
+    cmd = [ 'install_name_tool', '-change', fromPath, toPath, file ]
+    if subprocess.call( cmd ):
+        raise Exception( 'Failed to invoke install_name_tool.' )
+
+
+def _change_install_path( file, toPath ):
+    cmd = ['install_name_tool', '-id', toPath, file ]
+    if subprocess.call( cmd ):
+        raise Exception( 'Failed to invoke install_name_tool.' )
+
+
+if __name__ == '__main__':
+    remove_version = False
+    if len( sys.argv ) < 3 or sys.argv[1] == '--help':
+        print "rename_dylib <dir containing dylibs or single dylib> <install_path> [\"false\" indicates remove version numbers]"
+        sys.exit()
+        
+    if len( sys.argv ) > 3:
+        n = sys.argv[3].lower();
+        remove_version = not n.startswith('n') and not n.startswith('f') and not n.startswith('0')
+    
+    change_install_paths( sys.argv[1], sys.argv[2], remove_version )

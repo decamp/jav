@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd `dirname "$0"`
+python rename_dylib ../lib @loader_path true

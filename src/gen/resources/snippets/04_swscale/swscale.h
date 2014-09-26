@@ -1,0 +1,19 @@
+#define SWS_FAST_BILINEAR     1
+#define SWS_BILINEAR          2
+#define SWS_BICUBIC           4
+#define SWS_X                 8
+#define SWS_POINT          0x10
+#define SWS_AREA           0x20
+#define SWS_BICUBLIN       0x40
+#define SWS_GAUSS          0x80
+#define SWS_SINC          0x100
+#define SWS_LANCZOS       0x200
+#define SWS_SPLINE        0x400
+
+#define SWS_CS_ITU709         1
+#define SWS_CS_FCC            4
+#define SWS_CS_ITU601         5
+#define SWS_CS_ITU624         5
+#define SWS_CS_SMPTE170M      5
+#define SWS_CS_SMPTE240M      7
+#define SWS_CS_DEFAULT        5
