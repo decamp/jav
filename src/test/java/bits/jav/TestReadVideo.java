@@ -26,13 +26,17 @@ import static bits.jav.JavException.assertNoErr;
  */
 public class TestReadVideo {
 
+
+    public static final File TEST_VIDEO = new File( "src/test/resources/test.mp4" );
+
+
     public static void main( String[] args ) throws Exception {
         testReadVideo();
     }
 
     static void testReadVideo() throws Exception {
         Jav.init();
-        File file = new File( "src/test/resources/test.mp4" );
+        File file = TEST_VIDEO;
 
         JavFormatContext format = JavFormatContext.openInput( file );
         JavStream stream        = format.stream(0);

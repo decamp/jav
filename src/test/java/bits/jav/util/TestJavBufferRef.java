@@ -44,19 +44,36 @@ public class TestJavBufferRef {
         Jav.init();
         
         ReferenceQueue<ByteBuffer> queue = new ReferenceQueue<ByteBuffer>();
-        ByteBuffer bb = ByteBuffer.allocate( 1024 );
-        JavBufferRef r0 = JavBufferRef.wrap( bb, 0 );
-        JavBufferRef r1 = JavBufferRef.wrap( r0.pointer() );
-        
-        bb = null;
+        JavBufferRef r0, r1;
+
+        Reference<ByteBuffer> ref = context( queue );
+        r0 = JavBufferRef.wrap( ref.get(), 0 );
+
+        System.out.println( "REF COUNT: " + r0.refCount() + ", " + r0.nativeRefCount() );
+        r1 = JavBufferRef.wrap( r0.pointer() );
+        System.out.println( "REF COUNT: " + r0.refCount() + ", " + r0.nativeRefCount() );
+        System.out.println( "REF COUNT: " + r1.refCount() + ", " + r1.nativeRefCount() );
+
         r0 = null;
-        r1.deref();
-        
-        while( queue.poll() == null ) {
-            System.out.println( "not collected" );
+
+        while( r1.nativeRefCount() == 2 ) {
+            System.out.println( "NOT COLLECTED" );
             Thread.sleep( 100L );
             System.gc();
         }
+
+        System.out.println( "COLLECTED" );
+        System.out.println( "REF COUNT: " + r1.refCount() + ", " + r1.nativeRefCount() );
+        r1.deref();
+        r1 = null;
+
+        while( queue.poll() == null ) {
+            System.out.println( "NOT COLLECTED" );
+            Thread.sleep( 100L );
+            System.gc();
+        }
+
+        System.out.println( "COLLECTED" );
     }
     
     

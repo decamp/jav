@@ -25,7 +25,7 @@ public class TestFormatAvio {
 
     static void test1() throws Exception {
         Jav.init();
-        File file = new File( "resources_build/video.mp4" );
+        File file = TestReadVideo.TEST_VIDEO;
         JavFormatContext f = JavFormatContext.openInput( file );
         JavIOContext io = f.io();
         JavPacket packet = JavPacket.alloc();
@@ -44,8 +44,6 @@ public class TestFormatAvio {
 
         f.seek( 0, 5000000L, 0 );
         System.out.println( io.pos() + "\t" + io.filePos() );
-
-
     }
 
 

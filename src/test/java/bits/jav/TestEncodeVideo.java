@@ -25,11 +25,9 @@ import static bits.jav.Jav.*;
  */
 public class TestEncodeVideo {
 
-    
     public static void main( String[] args ) throws Exception {
         testEncode();
     }
-    
 
     @SuppressWarnings( "resource" )
     static void testEncode() throws Exception {

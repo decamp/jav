@@ -116,11 +116,9 @@ public class JavBufferRef implements NativeObject, Refable {
     
     /**
      * Create a writable reference from a given buffer reference, avoiding data copy
-     * if possible.
+     * if possible.On success, buf is either left untouched, or it is unreferenced
+     * and a new writable AVBufferRef is written in its place. On failure, buf is left untouched.
      *
-     * @param buf buffer reference to make writable. On success, buf is either left
-     *            untouched, or it is unreferenced and a new writable AVBufferRef is
-     *            written in its place. On failure, buf is left untouched.
      * @return 0 on success, a negative AVERROR on failure.
      */
     public int makeWritable() {
@@ -162,14 +160,19 @@ public class JavBufferRef implements NativeObject, Refable {
     public int refCount() {
         return mRefCount;
     }
+
+    /**
+     * @return the number of native references to tis BufferRef.
+     */
+    public int nativeRefCount() {
+        return nRefCount( mPointer );
+    }
     
     /**
-     * Reallocate a given buffer.
+     * Reallocate a given buffer. On success, the underlying buffer will be
+     * unreferenced and a new reference with the required size will be
+     * written in its place. On failure buf will be left untouched.
      *
-     * @param buf  a buffer reference to reallocate. On success, buf will be
-     *             unreferenced and a new reference with the required size will be
-     *             written in its place. On failure buf will be left untouched. *buf
-     *             may be NULL, then a new buffer is allocated.
      * @param size required new buffer size.
      * @return JavBufferRef with requested size. May be this, or different object.
      *
