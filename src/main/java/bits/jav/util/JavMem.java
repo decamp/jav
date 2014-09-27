@@ -129,12 +129,12 @@ public final class JavMem {
     public static native long strdup( long ptr );
 
     /**
-     * Duplicate the buffer p.
+     * Duplicate the nativeBuffer p.
      *
      * @param ptr   Buffer to be duplicated
-     * @param size  Size of buffer.
-     * @return Pointer to a newly allocated buffer containing a
-     *         copy of *ptr, or 0 if the buffer cannot be allocated.
+     * @param size  Size of nativeBuffer.
+     * @return Pointer to a newly allocated nativeBuffer containing a
+     *         copy of *ptr, or 0 if the nativeBuffer cannot be allocated.
      */
     public static native long memdup( long ptr, long size );
 

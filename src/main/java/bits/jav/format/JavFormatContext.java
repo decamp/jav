@@ -398,7 +398,7 @@ public final class JavFormatContext implements JavClass {
      *               dts/pts, ...
      *               This can be NULL (at any time, not just at the end), in
      *               order to immediately flush data buffered within the muxer,
-     *               for muxers that buffer up data internally before writing it
+     *               for muxers that nativeBuffer up data internally before writing it
      *               to the output.
      * @return < 0 on error, = 0 if OK, 1 if flushed and there is no more data to flush
      */

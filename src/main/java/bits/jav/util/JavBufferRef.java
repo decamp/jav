@@ -8,28 +8,48 @@
 package bits.jav.util;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 import bits.jav.JavException;
-import bits.util.ref.*;
+import static bits.jav.Jav.assertOkay;
 
 
 /**
- * Wrapper around AVBufferRef object.
- * <p>
- * AVBufferRef uses its own reference counting that is incompatible
- * with {@link bits.util.ref.Refable}. JavBufferRef holds a single reference
- * to the native AVBufferRef object, and uses its own reference counter
- * for the java object. When the java reference counter reaches zero,
- * the java object becomes invalid, and the reference to the native
- * object is released. If the JavBufferRef has a pool, then it will
- * added to that pool only after all references to the native object have 
- * been released.
- * <p>
- * TODO: Add pool support.
- * 
- * @author decamp
+ * AVBuffer is an API for reference-counted data buffers.
+ *
+ * <p>There are two core objects in this API -- AVBuffer and AVBufferRef. AVBuffer
+ * represents the data buffer itself; it is opaque and not meant to be accessed
+ * by the caller directly, but only through AVBufferRef. However, the caller may
+ * e.g. compare two AVBuffer pointers to check whether two different references
+ * are describing the same data buffer. AVBufferRef represents a single
+ * reference to an AVBuffer and it is the object that may be manipulated by the
+ * caller directly.
+ *
+ * <p>There are two functions provided for creating a new AVBuffer with a single
+ * reference -- av_buffer_alloc() to just allocate a new buffer, and
+ * av_buffer_create() to wrap an existing array in an AVBuffer. From an existing
+ * reference, additional references may be created with av_buffer_ref().
+ * Use av_buffer_unref() to free a reference (this will automatically free the
+ * data once all the references are freed).
+ *
+ * <p>The convention throughout this API and the rest of FFmpeg is such that the
+ * buffer is considered writable if there exists only one reference to it (and
+ * it has not been marked as read-only). The av_buffer_is_writable() function is
+ * provided to check whether this is true and av_buffer_make_writable() will
+ * automatically create a new writable buffer when necessary.
+ * Of course nothing prevents the calling code from violating this convention,
+ * however that is safe only when all the existing references are under its
+ * control.
+ *
+ * <p>Note: Referencing and unreferencing the buffers is thread-safe and thus
+ * may be done from multiple threads simultaneously without any need for
+ * additional locking.
+ *
+ * <p>Note: Two different references to the same buffer can point to different
+ * parts of the buffer (i.e. their AVBufferRef.data will not be equal).
  */
-public class JavBufferRef implements NativeObject, Refable {
-    
+public class JavBufferRef implements NativeObject {
+
     /**
      * Allocate an AVBuffer of the given size using av_malloc().
      *
@@ -44,216 +64,216 @@ public class JavBufferRef implements NativeObject, Refable {
     }
     
     /**
-     * Create JavBufferRef instance for native AVBufferRef instance. Note
-     * that this method constructs a new native AVBufferRef object.
-     * 
-     * @param pointer to AVBufferRef.
-     * @return JavBufferRef instance with provided pointer.
+     * Creates a new reference via {@code av_buffer_ref( pointer )}.
+     * The new reference is wrapped and returned as a JavBufferRef instance..
+     *
+     * @param pointer of type AVBufferRef*.
+     * @return JavBufferRef wrapping new reference.
      */
-    public static JavBufferRef wrap( long pointer ) {
+    public static JavBufferRef refPointer( long pointer ) {
         return new JavBufferRef( nRef( pointer ), null );
     }
-    
+
     /**
      * Create an AVBuffer from an existing array.
-     *
+     * <p>
      * If this function is successful, data is owned by the AVBuffer. The caller may
      * only access data through the returned AVBufferRef and references derived from
-     * it.
-     * If this function fails, data is left untouched.
-     * @param buf    Directly allocated ByteBuffer object, with position() and limit() set as desired.
-     * @param flags  a combination of AV_BUFFER_FLAG_*
+     * it. On failure, buf is left untouched.
      *
-     * @return an AVBufferRef referring to data on success, NULL on failure.
+     * @param buf    Directly allocated ByteBuffer object, with position() and limit() set as desired.
+     * @param flags  Union of desired AV_BUFFER_FLAG_* flags.
+     *
+     * @return an AVBufferRef referencing the byte nativeBuffer.
+     * @throws IllegalArgumentException on failer.
      */
     public static JavBufferRef wrap( ByteBuffer buf, int flags ) {
+        assert buf != null;
+        assert buf.isDirect();
+
         long p = nWrap( buf, buf.position(), buf.remaining(), flags );
         if( p == 0 ) {
             throw new IllegalArgumentException();
         }
-        return new JavBufferRef( p, null );
+        return new JavBufferRef( p, buf );
     }
-    
-    
-    
-    private long mPointer;
-    
-    private final ByteBuffer mWrappedBuf;
-    private int mRefCount = 1;
-    
-    
+
+
+    private volatile long mPointer;
+    private ByteBuffer mWrappedBuf;
+
     JavBufferRef( long pointer, ByteBuffer wrappedBuf ) {
         mPointer    = pointer;
         mWrappedBuf = wrappedBuf;
     }
-        
+
     
     /**
      * The data buffer. It is considered writable if and only if
-     * this is the only reference to the buffer, in which case
+     * this is the only reference to the nativeBuffer, in which case
      * av_buffer_is_writable() returns 1.
+     *
+     * @return uint8_t* pointer to data.
      */
     public long data() {
-        return nData( mPointer );
+        long p = mPointer;
+        return nData( p );
     }
-    
+
     /**
-     * Size of data in bytes.
+     * @return size of data in bytes.
      */
     public int size() {
-        return nSize( mPointer );
+        long p = mPointer;
+        return nSize( p );
     }
-    
+
     /**
-     * @return 1 if the caller may write to the data referred to by buf (which is
-     * true if and only if buf is the only reference to the underlying AVBuffer).
-     * Return 0 otherwise.
-     * A positive answer is valid until av_buffer_ref() is called on buf.
+     * Create a new reference to an AVBuffer.
+     *
+     * @return a new AVBufferRef referring to the same AVBuffer as buf or NULL on failure.
+     */
+    public synchronized JavBufferRef ref() {
+        long p = mPointer;
+        if( p == 0L ) {
+            throw new IllegalStateException( "Buffer already released" );
+        }
+        p = nRef( p );
+        return p == 0L ? null : new JavBufferRef( p, mWrappedBuf );
+    }
+
+    /**
+     * Free a given reference and automatically free the buffer if there are no more
+     * references to it.
+     * <p>
+     * Object cannot be used after {@code unref()} is called.
+     */
+    public synchronized void unref() {
+        long p = mPointer;
+        mPointer = 0L;
+        if( p != 0L ) {
+            nUnref( p );
+            mWrappedBuf = null;
+        }
+    }
+
+    /**
+     * @return count of references to data buffer
+     */
+    public int refCount() {
+        return nRefCount( mPointer );
+    }
+
+    /**
+     * A nativeBuffer is "writable" iff there is only a single reference to the nativeBuffer.
+     *
+     * @return true if the caller may write to the nativeBuffer. A true value is valid
+     *         until ref() is called on buf.
      */
     public boolean isWritable() {
-        return nIsWritable( mPointer ) != 0;
+        long p = mPointer;
+        return nIsWritable( p ) != 0;
     }
-    
+
     /**
-     * Create a writable reference from a given buffer reference, avoiding data copy
-     * if possible.On success, buf is either left untouched, or it is unreferenced
-     * and a new writable AVBufferRef is written in its place. On failure, buf is left untouched.
+     * Create a writable reference from a given nativeBuffer reference, avoiding data copy
+     * if possible. On success, buf is either left untouched, or is unreferenced
+     * and a new writable AVBufferRef is created in its place. On failure, buf is
+     * left untouched.
      *
      * @return 0 on success, a negative AVERROR on failure.
      */
     public int makeWritable() {
-        return nMakeWritable( mPointer );
-    }
-
-    
-    public boolean ref() {
-        synchronized( this ) {
-            if( mPointer == 0L ) {
-                return false;
-            }
-            mRefCount++;
-            return true;
+        int ret = nMakeWritable( mPointer );
+        if( ret == 0 ) {
+            mWrappedBuf = null;
         }
-    }
-    
-    
-    public void deref() {
-        long ptr = 0L;
-        
-        synchronized( this ) {
-            if( --mRefCount > 0 ) {
-                return;
-            }
-            mRefCount = 0;
-            if( mPointer == 0L ) {
-                return;
-            }
-            
-            ptr = mPointer;
-            mPointer = 0L;
-        }
-        
-        nUnref( ptr );
-    }
-    
-    
-    public int refCount() {
-        return mRefCount;
+        return ret;
     }
 
     /**
-     * @return the number of native references to tis BufferRef.
-     */
-    public int nativeRefCount() {
-        return nRefCount( mPointer );
-    }
-    
-    /**
-     * Reallocate a given buffer. On success, the underlying buffer will be
+     * Reallocate a given nativeBuffer. On success, the underlying nativeBuffer will be
      * unreferenced and a new reference with the required size will be
-     * written in its place. On failure buf will be left untouched.
+     * written in its place. On failure buf will be left untouched and a JavException will
+     * be thrown.
      *
-     * @param size required new buffer size.
+     * @param size required new nativeBuffer size.
      * @return JavBufferRef with requested size. May be this, or different object.
      *
-     * @note the buffer is actually reallocated with av_realloc() only if it was
+     * Note: the nativeBuffer is actually reallocated with av_realloc() only if it was
      * initially allocated through av_buffer_realloc(NULL) and there is only one
      * reference to it (i.e. the one passed to this function). In all other cases
-     * a new buffer is allocated and the data is copied.
-     * 
+     * a new nativeBuffer is allocated and the data is copied.
+     *
      * @throws JavException on error.
      */
-    public JavBufferRef realloc( int size ) throws JavException {
+    public synchronized JavBufferRef realloc( int size ) throws JavException {
         long[] p = { mPointer };
-        int ret  = nRealloc( p, size );
-        if( ret != 0 ) {
-            throw new JavException( ret );
-        }
-        
+        assertOkay( nRealloc( p, size ) );
+
         long ptr = p[0];
         if( ptr == mPointer ) {
             return this;
         }
-        
+
+        mPointer = 0;
+        mWrappedBuf = null;
         return new JavBufferRef( ptr, null );
     }
 
     /**
-     * Don't mess with this.
+     * @return true iff this object is backed by a java-allocated ByteBuffer.
      */
-    public long buffer() {
-        return nBuffer( mPointer );
+    public boolean hasJavaBuffer() {
+        return mWrappedBuf != null;
     }
 
-    /**
-     * Don't mess with this.
-     */
-    public ByteBuffer wrappedBuffer() {
-        return mWrappedBuf;
+
+    public ByteBuffer javaBuffer() {
+        ByteBuffer b = mWrappedBuf;
+        return b == null ? null : b.duplicate().order( ByteOrder.nativeOrder() );
     }
-    
-    
-    
+
     @Override
     public long pointer() {
         return mPointer;
     }
-    
-    
+
+
     public ReleaseMethod releaseMethod() {
-        return ReleaseMethod.SELF;
+        return ReleaseMethod.USER;
     }
-    
-    
+
     @Override
     protected void finalize() throws Throwable {
-        long p = 0L;
-        synchronized( this ) {
-            p = mPointer;
-            mPointer = 0L;
-        }
-        if( p != 0L ) {
-            nUnref( p );
-        }            
+        unref();
         super.finalize();
     }
-    
-    
-    
+
+    /**
+     * The native buffer. Should not be accessed directly.
+     *
+     * @return AVBuffer pointer.
+     */
+    long buffer() {
+        return nBuffer( mPointer );
+    }
+
+
     private static native long nAlloc( int size );
     private static native long nAllocZ( int size );
     private static native long nWrap( ByteBuffer buf, int off, int size, int flags );
-    private static native int nRealloc( long[] pointer, int size );
-    
+
+    private static native long nBuffer( long pointer );
+    private static native long nData( long pointer );
+    private static native int nSize( long pointer );
+
     private static native long nRef( long pointer );
     private static native void nUnref( long pointer );
     private static native int nRefCount( long pointer );
     
     private static native int nIsWritable( long pointer );
     private static native int nMakeWritable( long pointer );
-    
-    private static native long nBuffer( long pointer );
-    private static native long nData( long pointer );
-    private static native int nSize( long pointer );
+    private static native int nRealloc( long[] pointer, int size );
 
 }

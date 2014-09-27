@@ -11,75 +11,216 @@ import java.lang.ref.*;
 import java.nio.ByteBuffer;
 
 import bits.jav.Jav;
+import org.junit.*;
+
+import static org.junit.Assert.*;
+
 
 /**
  * @author decamp
  */
 public class TestJavBufferRef {
-    
-    public static void main( String[] args ) throws Exception {
-        test2();
-    }
-    
-    
-    static void test1() throws Exception {
+
+
+    public TestJavBufferRef() {
         Jav.init();
-        
-        ByteBuffer bb = ByteBuffer.allocateDirect( 1024 );
-        JavBufferRef b = JavBufferRef.alloc( 1024, true );
-        
-        System.out.println( b.pointer() );
-        System.out.println( b.size() );
-        System.out.println( b.data() );
-        System.out.println( b.buffer() );
-        
-        JavMem.copy( b.data(), bb );
-        bb.flip();
-            
-        b.deref();
     }
 
-    
-    static void test2() throws Exception {
-        Jav.init();
-        
-        ReferenceQueue<ByteBuffer> queue = new ReferenceQueue<ByteBuffer>();
+
+    @Test
+    public void testAlloc() throws Exception {
+        JavBufferRef ref = JavBufferRef.alloc( 1024, true );
+        assertNotNull( ref );
+        assertTrue( ref.pointer() != 0 );
+        assertEquals( 1, ref.refCount() );
+        assertEquals( 1024, ref.size() );
+        assertTrue( ref.data() != 0 );
+        assertBufferIsCleared( ref );
+
+        ref.unref();
+    }
+
+    @Test
+    public void testWrap() throws Exception {
         JavBufferRef r0, r1;
+        Reference<ByteBuffer> ref;
+        {
+            ByteBuffer bb = ByteBuffer.allocateDirect( 1024 );
+            ref = new WeakReference<ByteBuffer>( bb );
+            r0 = JavBufferRef.wrap( bb, 0 );
+        }
 
-        Reference<ByteBuffer> ref = context( queue );
-        r0 = JavBufferRef.wrap( ref.get(), 0 );
+        assertEquals( 1, r0.refCount() );
+        assertNotNull( ref.get() );
+        assertTrue( r0.isWritable() );
 
-        System.out.println( "REF COUNT: " + r0.refCount() + ", " + r0.nativeRefCount() );
-        r1 = JavBufferRef.wrap( r0.pointer() );
-        System.out.println( "REF COUNT: " + r0.refCount() + ", " + r0.nativeRefCount() );
-        System.out.println( "REF COUNT: " + r1.refCount() + ", " + r1.nativeRefCount() );
+        r1 = r0.ref();
 
+        assertEquals( 2, r0.refCount() );
+        assertEquals( 2, r1.refCount() );
+        assertEquals( r0.data(), r1.data() );
+        assertEquals( r0.javaBuffer(), r1.javaBuffer() );
+        assertTrue( r0.hasJavaBuffer() );
+        assertTrue( !r0.isWritable() );
+
+        r0.unref();
         r0 = null;
 
-        while( r1.nativeRefCount() == 2 ) {
-            System.out.println( "NOT COLLECTED" );
-            Thread.sleep( 100L );
+        assertEquals( 1, r1.refCount() );
+        assertTrue( r1.isWritable() );
+
+        // Make sure reference to ByteBuffer has been maintained.
+        for( int i = 0; i < 3; i++ ) {
+            Thread.sleep( 50L );
             System.gc();
+            assertNotNull( ref.get() );
         }
 
-        System.out.println( "COLLECTED" );
-        System.out.println( "REF COUNT: " + r1.refCount() + ", " + r1.nativeRefCount() );
-        r1.deref();
+        r1.unref();
         r1 = null;
 
-        while( queue.poll() == null ) {
-            System.out.println( "NOT COLLECTED" );
-            Thread.sleep( 100L );
+        // Make sure reference to ByteBuffer has been released.
+        for( int i = 0; i < 5; i++ ) {
+            Thread.sleep( 50L );
+            System.gc();
+            if( ref.get() == null ) {
+                break;
+            }
+        }
+
+        assertNull( ref.get() );
+    }
+
+    @Test
+    public void testRefPointer() throws Exception {
+        JavBufferRef r0, r1;
+        Reference<ByteBuffer> ref;
+        {
+            ByteBuffer bb = ByteBuffer.allocateDirect( 1024 );
+            ref = new WeakReference<ByteBuffer>( bb );
+            r0 = JavBufferRef.wrap( bb, 0 );
+        }
+
+        assertEquals( 1, r0.refCount() );
+        assertNotNull( ref.get() );
+        assertTrue( r0.isWritable() );
+
+        r1 = JavBufferRef.refPointer( r0.pointer() );
+
+        assertEquals( 2, r0.refCount() );
+        assertEquals( 2, r1.refCount() );
+        assertEquals( r0.data(), r1.data() );
+        assertTrue( r0.hasJavaBuffer() );
+        assertTrue( !r1.hasJavaBuffer() );
+        assertTrue( !r0.isWritable() );
+
+        r0.unref();
+        r0 = null;
+
+        assertEquals( 1, r1.refCount() );
+        assertTrue( r1.isWritable() );
+
+        // Make sure reference to ByteBuffer has been maintained.
+        for( int i = 0; i < 3; i++ ) {
+            Thread.sleep( 50L );
+            System.gc();
+            assertNotNull( ref.get() );
+        }
+
+        r1.unref();
+        r1 = null;
+
+        // Make sure reference to ByteBuffer has been released.
+        for( int i = 0; i < 5; i++ ) {
+            Thread.sleep( 50L );
+            System.gc();
+            if( ref.get() == null ) {
+                break;
+            }
+        }
+
+        assertNull( ref.get() );
+    }
+
+    @Test
+    public void testUnref() throws Exception {
+        // Just checking for JVM crashes or error messages here.
+        JavBufferRef a = JavBufferRef.alloc( 1024, true );
+        JavBufferRef b = a.ref();
+        a.unref();
+        b.unref();
+
+        a = JavBufferRef.wrap( ByteBuffer.allocateDirect( 1024 ), 0 );
+        b = a.ref();
+        a.unref();
+        b.unref();
+
+        for( int i = 0; i < 4; i++ ) {
+            Thread.sleep( 50L );
             System.gc();
         }
 
-        System.out.println( "COLLECTED" );
+        System.out.println( a == b );
     }
-    
-    
-    static Reference<ByteBuffer> context( ReferenceQueue<ByteBuffer> queue ) {
-        ByteBuffer c = ByteBuffer.allocate( 1024 );
-        return new WeakReference<ByteBuffer>( c, queue );
+
+    @Test
+    public void testRealloc() throws Exception {
+        Jav.init();
+
+        // Basic realloc.
+        JavBufferRef a = JavBufferRef.alloc( 1024, true );
+        assertEquals( 1024, a.size() );
+        a = a.realloc( 2048 );
+        assertTrue( 2048 <= a.size() );
+        a.unref();
+
+        // Realloc with java-allocated byte buffer.
+        Reference<ByteBuffer> ref;
+        {
+            ByteBuffer bb = ByteBuffer.allocateDirect( 1024 );
+            ref = new WeakReference<ByteBuffer>( bb );
+            a = JavBufferRef.wrap( bb, 0 );
+        }
+        assertEquals( 1024, a.size() );
+
+        JavBufferRef b = a.realloc( 2048 );
+
+        assertTrue( !a.hasJavaBuffer() );
+        assertTrue( !b.hasJavaBuffer() );
+        assertTrue( 2048 <= b.size() );
+
+        b.unref();
+
+        for( int i = 0; i < 5; i++ ) {
+            Thread.sleep( 50L );
+            System.gc();
+            if( ref.get() == null ) {
+                break;
+            }
+        }
+
+        assertNull( ref.get() );
     }
-    
+
+
+    static void assertBufferIsCleared( JavBufferRef ref ) {
+        ByteBuffer bb = copyData( ref );
+        while( bb.remaining() > 0 ) {
+            assertEquals( 0, bb.get() );
+        }
+    }
+
+
+    static ByteBuffer copyData( JavBufferRef ref ) {
+        if( ref == null ) {
+            return null;
+        }
+        int len = ref.size();
+        ByteBuffer bb = ByteBuffer.allocateDirect( len );
+        JavMem.copy( ref.data(), bb );
+        bb.flip();
+
+        return bb;
+    }
+
 }

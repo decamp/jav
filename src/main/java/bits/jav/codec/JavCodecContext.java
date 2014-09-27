@@ -145,18 +145,18 @@ public final class JavCodecContext implements JavClass {
      * Some decoders may support multiple frames in a single AVPacket, such
      * decoders would then just decode the first frame.
      * <p>
-     * Warning: The input buffer must be {@code FF_INPUT_BUFFER_PADDING_SIZE} larger than
+     * Warning: The input nativeBuffer must be {@code FF_INPUT_BUFFER_PADDING_SIZE} larger than
      * the actual read bytes because some optimized bitstream readers read 32 or 64
      * bits at once and could read over the end.
      * <p>
-     * Warning: The end of the input buffer buf should be set to 0 to ensure that
+     * Warning: The end of the input nativeBuffer buf should be set to 0 to ensure that
      * no overreading happens for damaged MPEG streams.
      * <p>
      * Note: Codecs which have the CODEC_CAP_DELAY capability set have a delay
      * between input and output, these need to be fed with {@code avpkt.data = null}
      * {@code avpkt.size = 0} at the end to return the remaining frames.
      *
-     * @param packet   [in] The input AVPacket containing the input buffer.
+     * @param packet   [in] The input AVPacket containing the input nativeBuffer.
      *                 You can create such packet with av_init_packet() and by then setting
      *                 data and size, some decoders might in addition need other fields like
      *                 flags&AV_PKT_FLAG_KEY. All decoders are designed to use the least
@@ -198,7 +198,7 @@ public final class JavCodecContext implements JavClass {
      *                  CODEC_CAP_DELAY capability set.
      *                  
      * @param out       [out] output JavPacket.
-     *                  The user can supply an output buffer by setting
+     *                  The user can supply an output nativeBuffer by setting
      *                  avpkt->data and avpkt->size prior to calling the
      *                  function, but if the size of the user-provided data is not
      *                  large enough, encoding will fail. All other AVPacket fields
@@ -210,7 +210,7 @@ public final class JavCodecContext implements JavClass {
      *                  <p>
      *                  If this function fails or produces no output, avpkt will be
      *                  freed using av_free_packet() (i.e. avpkt->destruct will be
-     *                  called to free the user supplied buffer).
+     *                  called to free the user supplied nativeBuffer).
      * 
      * @param gotPacket [out] got_packet_ptr This field is set to 1 by libavcodec if 
      *                  the output packet is non-empty, and to 0 if it is empty. 
@@ -237,21 +237,21 @@ public final class JavCodecContext implements JavClass {
      * Even if no frames are returned, the packet needs to be fed to the decoder
      * with remaining data until it is completely consumed or an error occurs.
      * <p>
-     * WARNING - The input buffer, avpkt->data must be FF_INPUT_BUFFER_PADDING_SIZE
+     * WARNING - The input nativeBuffer, avpkt->data must be FF_INPUT_BUFFER_PADDING_SIZE
      * larger than the actual read bytes because some optimized bitstream
      * readers read 32 or 64 bits at once and could read over the end.
      * <p>
-     * NOTE - You might have to align the input buffer. The alignment requirements
+     * NOTE - You might have to align the input nativeBuffer. The alignment requirements
      * depend on the CPU and the decoder.
      * 
-     * @param packet     [in] The input JavPacket containing the input buffer.
+     * @param packet     [in] The input JavPacket containing the input nativeBuffer.
      *                   At least packet->data and packet->size should be set. Some
      *                   decoders might also require additional fields to be set.
      * 
      * @param out        [out] The JavFrame in which to store decoded audio samples.
-     *                   Decoders request a buffer of a particular size by setting
+     *                   Decoders request a nativeBuffer of a particular size by setting
      *                   AVFrame.nb_samples prior to calling get_buffer(). The
-     *                   decoder may, however, only utilize part of the buffer by
+     *                   decoder may, however, only utilize part of the nativeBuffer by
      *                   setting AVFrame.nb_samples to a smaller value in the
      *                   output frame.
      * 
@@ -282,7 +282,7 @@ public final class JavCodecContext implements JavClass {
      *                  this.frameSize() for all frames except the last. The
      *                  final frame may be smaller than this.frameSize().
      *                  
-     * @param out       [out] The user can supply an output buffer by setting
+     * @param out       [out] The user can supply an output nativeBuffer by setting
      *                  out.dataPointer() and out.size() prior to calling the
      *                  function, but if the size of the user-provided data is not
      *                  large enough, encoding will fail. If out.dataPointer() and
@@ -294,7 +294,7 @@ public final class JavCodecContext implements JavClass {
      *                  <p>
      *                  If this function fails or produces no output, out will be
      *                  freed using av_free_packet() (i.e. avpkt->destruct will be
-     *                  called to free the user supplied buffer).
+     *                  called to free the user supplied nativeBuffer).
      *              
      * @param gotPacket [out] gotPacket[0] is set to 1 by libavcodec if the output
      *                  packet is non-empty, and to 0 if it is empty. If the function
@@ -1032,7 +1032,7 @@ public final class JavCodecContext implements JavClass {
     }
     
     /**
-     * decoder bitstream buffer size
+     * decoder bitstream nativeBuffer size
      * - encoding: Set by user.
      * - decoding: unused
      */
@@ -1154,7 +1154,7 @@ public final class JavCodecContext implements JavClass {
     }
 
     /**
-     * Number of bits which should be loaded into the rc buffer before decoding starts.
+     * Number of bits which should be loaded into the rc nativeBuffer before decoding starts.
      * - encoding: Set by user.
      * - decoding: unused
      */

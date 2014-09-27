@@ -229,7 +229,7 @@ public class TestSwresample {
             buf.clear();
 
 
-            {   // Copy from frame buffer to array.
+            {   // Copy from frame nativeBuffer to array.
                 final int end = Math.min( audio[0].length, samplePos + resSamps );
                 for( int i = samplePos; i < end; i++ ) {
                     for( int j = 0; j < chans; j++ ) {

@@ -48,7 +48,7 @@ import java.nio.ByteBuffer;
  * output space or if sample rate conversion is done, which requires "future"
  * samples. Samples that do not require future input can be retrieved at any
  * time by using swr_convert() (in_count can be set to 0).
- * At the end of conversion the resampling buffer can be flushed by calling
+ * At the end of conversion the resampling nativeBuffer can be flushed by calling
  * swr_convert() with NULL in and 0 in_count.
  *
  * The delay between input and output, can at any time be found by using
@@ -219,7 +219,7 @@ public class SwrContext implements JavClass {
      * @param src         Source frame.
      * @param srcSampNum  Number of samples per channel to convert.
      * @param dst         Destination frame.
-     * @param dstSampNum  Available space in destination buffer, in samples pre channel.
+     * @param dstSampNum  Available space in destination nativeBuffer, in samples pre channel.
      *
      * @return number of samples output per channel
      */
@@ -236,10 +236,10 @@ public class SwrContext implements JavClass {
      * You can avoid this buffering by providing more output space than input.
      * Converting will run directly without copying whenever possible.
      *
-     * @param srcPtr       Source buffer of type uint8_t**.
+     * @param srcPtr       Source nativeBuffer of type uint8_t**.
      * @param srcSampNum   Number of samples per channel to convert.
-     * @param dstPtr       Destination buffer of type uint8_t**.
-     * @param dstSampNum   Available space in destination buffer, in samples pre channel.
+     * @param dstPtr       Destination nativeBuffer of type uint8_t**.
+     * @param dstSampNum   Available space in destination nativeBuffer, in samples pre channel.
      *
      * @return number of samples output per channel
      */
@@ -248,12 +248,12 @@ public class SwrContext implements JavClass {
     }
 
     /**
-     * Converts packed (or single-channel) audio buffer>
+     * Converts packed (or single-channel) audio nativeBuffer>
      *
-     * @param src       Direct byte buffer containing source audio.
-     * @param srcLen    Number of samples in source buffer.
-     * @param dst       Direct byte buffer to receive destination audio.
-     * @param dstLen    Number of available samples in destination buffer.
+     * @param src       Direct byte nativeBuffer containing source audio.
+     * @param srcLen    Number of samples in source nativeBuffer.
+     * @param dst       Direct byte nativeBuffer to receive destination audio.
+     * @param dstLen    Number of available samples in destination nativeBuffer.
      * @return number of samples output per channel.
      */
     public int convertPacked( ByteBuffer src, int srcOff, int srcLen, ByteBuffer dst, int dstOff, int dstLen ) {
@@ -324,7 +324,7 @@ public class SwrContext implements JavClass {
     /**
      * Gets the delay the next input sample will experience relative to the next output sample.
      *
-     * Swresample can buffer data if more input has been provided than available
+     * Swresample can nativeBuffer data if more input has been provided than available
      * output space, also converting between sample rates needs a delay.
      * This function returns the sum of all such delays.
      * The exact delay is not necessarily an integer value in either input or

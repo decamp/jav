@@ -33,11 +33,27 @@ JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nWrap
 
 /*
  * Class:     bits_jav_util_JavBufferRef
- * Method:    nRealloc
- * Signature: ([JI)I
+ * Method:    nBuffer
+ * Signature: (J)J
  */
-JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nRealloc
-  (JNIEnv *, jclass, jlongArray, jint);
+JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nBuffer
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     bits_jav_util_JavBufferRef
+ * Method:    nData
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nData
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     bits_jav_util_JavBufferRef
+ * Method:    nSize
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nSize
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     bits_jav_util_JavBufferRef
@@ -81,27 +97,11 @@ JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nMakeWritable
 
 /*
  * Class:     bits_jav_util_JavBufferRef
- * Method:    nBuffer
- * Signature: (J)J
+ * Method:    nRealloc
+ * Signature: ([JI)I
  */
-JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nBuffer
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     bits_jav_util_JavBufferRef
- * Method:    nData
- * Signature: (J)J
- */
-JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nData
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     bits_jav_util_JavBufferRef
- * Method:    nSize
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nSize
-  (JNIEnv *, jclass, jlong);
+JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nRealloc
+  (JNIEnv *, jclass, jlongArray, jint);
 
 #ifdef __cplusplus
 }

@@ -78,7 +78,7 @@ public class Jav {
 
 
     /**
-     * Always treat the buffer as read-only, even when it has only one
+     * Always treat the nativeBuffer as read-only, even when it has only one
      * reference.
      */
     public static final int AV_BUFFER_FLAG_READONLY = (1 << 0); 
@@ -495,10 +495,10 @@ public class Jav {
      * (such as AVFrame in libavcodec) is as follows:
      *
      * For planar sample formats, each audio channel is in a separate data plane,
-     * and linesize is the buffer size, in bytes, for a single plane. All data
+     * and linesize is the nativeBuffer size, in bytes, for a single plane. All data
      * planes must be the same size. For packed sample formats, only the first data
      * plane is used, and samples for each channel are interleaved. In this case,
-     * linesize is the buffer size, in bytes, for the 1 plane.
+     * linesize is the nativeBuffer size, in bytes, for the 1 plane.
      */
     
     public static final int AV_SAMPLE_FMT_NONE = 0xFFFFFFFF; 
@@ -996,7 +996,7 @@ public class Jav {
     
     /**
      * @ingroup lavc_encoding
-     * minimum encoding buffer size
+     * minimum encoding nativeBuffer size
      * Used to avoid some checks during header writing.
      */
     public static final int FF_MIN_BUFFER_SIZE = 0x00004000; 
@@ -1134,7 +1134,7 @@ public class Jav {
     /**
      * Codec uses get_buffer() for allocating buffers and supports custom allocators.
      * If not set, it might not use get_buffer() at all or use operations that
-     * assume the buffer was allocated by avcodec_default_get_buffer.
+     * assume the nativeBuffer was allocated by avcodec_default_get_buffer.
      */
     public static final int CODEC_CAP_DR1             = 0x00000002; 
     public static final int CODEC_CAP_TRUNCATED       = 0x00000008; 

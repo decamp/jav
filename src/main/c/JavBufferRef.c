@@ -5,26 +5,25 @@
  * This file might include comments and code snippets from FFMPEG, released under LGPL 2.1 or later.
  */
 
-
 #include "JavBufferRef.h"
 #include "libavutil/buffer.h"
 #include "libavutil/mem.h"
 
-typedef struct 
+typedef struct
 {
 	JNIEnv* env;
 	jobject ref;
 } JavaRef;
 
 
-void freeJavaBuf( void *opaque, uint8_t *data )
+void freeJavaBuf
+( void *opaque, uint8_t *data )
 {
 	JavaRef *ref = (JavaRef*)opaque;
 	JNIEnv *env = ref->env;
 	(*env)->DeleteGlobalRef( env, ref->ref );
 	av_free( ref );
 }
-
 
 
 JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nAlloc
@@ -48,6 +47,9 @@ JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nWrap
 {
 	uint8_t *data = (*env)->GetDirectBufferAddress( env, userBuf ) + bufOff;
 	JavaRef *ref  = (JavaRef*)av_malloc( sizeof( JavaRef ) );
+	if( ref == NULL ) {
+	    return 0;
+	}
 	ref->env = env;
 	ref->ref = (*env)->NewGlobalRef( env, userBuf );
 	AVBufferRef *ret = av_buffer_create( data, bufLen, &freeJavaBuf, ref, flags );
@@ -55,13 +57,26 @@ JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nWrap
 }
 
 
-JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nRealloc
-( JNIEnv *env, jclass clazz, jlongArray jarr, jint size )
+JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nBuffer
+( JNIEnv *env, jclass clazz, jlong ptr )
 {
-	jlong *ptr = (*env)->GetLongArrayElements( env, jarr, NULL );
-	int err = av_buffer_realloc( (AVBufferRef**)ptr, size );
-	(*env)->ReleaseLongArrayElements( env, jarr, ptr, 0 );
-	return err;
+	AVBuffer *buf = (**(AVBufferRef**)&ptr).buffer;
+	return *(jlong*)&buf;
+}
+
+
+JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nData
+(JNIEnv *env, jclass clazz, jlong ptr)
+{
+	uint8_t *data = (**(AVBufferRef**)&ptr).data;
+	return *(jlong*)&data;
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nSize
+(JNIEnv *env, jclass clazz, jlong ptr)
+{
+	return (**(AVBufferRef**)&ptr).size;
 }
 
 
@@ -106,25 +121,11 @@ JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nMakeWritable
 }
 
 
-JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nBuffer
-( JNIEnv *env, jclass clazz, jlong ptr )
+JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nRealloc
+( JNIEnv *env, jclass clazz, jlongArray jarr, jint size )
 {
-	AVBuffer *buf = (**(AVBufferRef**)&ptr).buffer;
-	return *(jlong*)&buf;
+	jlong *ptr = (*env)->GetLongArrayElements( env, jarr, NULL );
+	int err = av_buffer_realloc( (AVBufferRef**)ptr, size );
+	(*env)->ReleaseLongArrayElements( env, jarr, ptr, 0 );
+	return err;
 }
-
-
-JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nData
-(JNIEnv *env, jclass clazz, jlong ptr)
-{
-	uint8_t *data = (**(AVBufferRef**)&ptr).data;
-	return *(jlong*)&data;
-}
-
-
-JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nSize
-(JNIEnv *env, jclass clazz, jlong ptr)
-{
-	return (**(AVBufferRef**)&ptr).size;
-}
-

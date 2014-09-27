@@ -25,28 +25,28 @@ public class JavIOContext implements JavClass {
 
 
     /**
-     * @return start of the buffer.
+     * @return start of the nativeBuffer.
      */
     public long buffer() {
         return nBuffer( mPointer );
     }
 
     /**
-     * Maximum buffer size
+     * Maximum nativeBuffer size
      * */
     public int bufferSize() {
         return nBufferSize( mPointer );
     }
 
     /**
-     * @return Current position in the buffer
+     * @return Current position in the nativeBuffer
      */
     public long bufferPtr() {
         return nBufferPtr( mPointer );
     }
 
     /**
-     * @return End of the data, may be less than buffer+buffer_size if the read function returned
+     * @return End of the data, may be less than nativeBuffer+buffer_size if the read function returned
      *         less data than requested, e.g. for streams where no more data has been received yet.
      */
     public long bufferEnd() {
@@ -54,14 +54,14 @@ public class JavIOContext implements JavClass {
     }
 
     /**
-     * @return position in the file of the current buffer
+     * @return position in the file of the current nativeBuffer
      */
     public long pos() {
         return nPos( mPointer );
     }
 
     /**
-     * @return position in the file that corresponds to current buffer position.
+     * @return position in the file that corresponds to current nativeBuffer position.
      */
     public long filePos() {
         return nPosPtr( mPointer );
@@ -117,7 +117,7 @@ public class JavIOContext implements JavClass {
 
     /**
      * avio_read and avio_write should if possible be satisfied directly
-     * instead of going through a buffer, and avio_seek will always
+     * instead of going through a nativeBuffer, and avio_seek will always
      * call the underlying seek function directly.
      */
     public int direct() {

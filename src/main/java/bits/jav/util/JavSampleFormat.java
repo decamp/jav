@@ -39,7 +39,7 @@ public final class JavSampleFormat {
      * Generate a string corresponding to the sample format with
      * sample_fmt, or a header if sample_fmt is negative.
      *
-     * @param buf Direct buffer to receive string.
+     * @param buf Direct nativeBuffer to receive string.
      * @param fmt the number of the sample format to print the
      *            corresponding info string, or a negative value to print the
      *            corresponding header.
@@ -68,14 +68,14 @@ public final class JavSampleFormat {
 
 
     /**
-     * Get the required buffer size for the given audio parameters.
+     * Get the required nativeBuffer size for the given audio parameters.
      *
      * @param chanNum   the number of channels
      * @param sampNum    the number of samples in a single channel
      * @param sampFmt    the sample format
-     * @param align        buffer size alignment (0 = default, 1 = no alignment)
+     * @param align        nativeBuffer size alignment (0 = default, 1 = no alignment)
      * @param optLineSize  [OUTPUT] receives calculated linesize. May be NULL.
-     * @return required buffer size, or negative error code on failure
+     * @return required nativeBuffer size, or negative error code on failure
      */
     public static native int getBufferSize( int chanNum,
                                             int sampNum,
@@ -88,14 +88,14 @@ public final class JavSampleFormat {
      * format sampFmt.
      *
      * The outBufOffsets is filled with the offets to the audio sample data planes:
-     * for planar, set the start point of each channel's data within the buffer,
-     * for packed, set the start point of the entire buffer only.
+     * for planar, set the start point of each channel's data within the nativeBuffer,
+     * for packed, set the start point of the entire nativeBuffer only.
      *
      * The value pointed to by linesize is set to the aligned size of each
-     * channel's data buffer for planar layout, or to the aligned size of the
-     * buffer for all channels for packed layout.
+     * channel's data nativeBuffer for planar layout, or to the aligned size of the
+     * nativeBuffer for all channels for packed layout.
      *
-     * The buffer in buf must be big enough to contain all the samples
+     * The nativeBuffer in buf must be big enough to contain all the samples
      * (use av_samples_get_buffer_size() to compute its minimum size),
      * otherwise the audio_data pointers will point to invalid data.
      *
@@ -107,7 +107,7 @@ public final class JavSampleFormat {
      * @param sampNum        Number of samples per channel.
      * @param sampFmt        Sample format.
      * @param align          Buffer size alignment (0 = default, 1 = no alignmnet)
-     * @param outDataPtrs    [OUT] Array of type uint8_t*[] to receive buffer pointers for each channel.
+     * @param outDataPtrs    [OUT] Array of type uint8_t*[] to receive nativeBuffer pointers for each channel.
      *                       For planar formats, this must be uint8_t*[chanNum] or larger.
      *                       For packed formats, this may be uint8_t*[1] or larger.
      * @param optLineSize    [OUT] Array of length 1 to receive line size. May be NULL.
@@ -137,14 +137,14 @@ public final class JavSampleFormat {
      * format sampFmt.
      *
      * The outBufOffsets is filled with the offets to the audio sample data planes:
-     * for planar, set the start point of each channel's data within the buffer,
-     * for packed, set the start point of the entire buffer only.
+     * for planar, set the start point of each channel's data within the nativeBuffer,
+     * for packed, set the start point of the entire nativeBuffer only.
      *
      * The value pointed to by linesize is set to the aligned size of each
-     * channel's data buffer for planar layout, or to the aligned size of the
-     * buffer for all channels for packed layout.
+     * channel's data nativeBuffer for planar layout, or to the aligned size of the
+     * nativeBuffer for all channels for packed layout.
      *
-     * The buffer in buf must be big enough to contain all the samples
+     * The nativeBuffer in buf must be big enough to contain all the samples
      * (use av_samples_get_buffer_size() to compute its minimum size),
      * otherwise the audio_data pointers will point to invalid data.
      *
@@ -156,7 +156,7 @@ public final class JavSampleFormat {
      * @param sampNum        Number of samples per channel.
      * @param sampFmt        Sample format.
      * @param align          Buffer size alignment (0 = default, 1 = no alignmnet)
-     * @param outDataPtr     [OUT] Array of type uint8_t*[] to receive buffer pointers for each channel.
+     * @param outDataPtr     [OUT] Array of type uint8_t*[] to receive nativeBuffer pointers for each channel.
      *                       For planar formats, this must be uint8_t*[chanNum] or larger.
      *                       For packed formats, this may be uint8_t*[1] or larger.
      * @param optLineSize    [OUT] Array of length 1 to receive line size. May be NULL.
@@ -174,12 +174,12 @@ public final class JavSampleFormat {
     /**
      * Copy samples from src to dst.
      *
-     * @param srcPtr     [uint8_t**]-type pointer to source buffer array.
+     * @param srcPtr     [uint8_t**]-type pointer to source nativeBuffer array.
      * @param srcOff     Offset into source data, in samples-per-channel.
      * @param chanNum    Number of audio channels.
      * @param sampNum    Number of samples per channel to copy.
      * @param sampFmt    Audio sample format.
-     * @param dstPtr     [uint8_t**]-type pointer to destination buffer array.
+     * @param dstPtr     [uint8_t**]-type pointer to destination nativeBuffer array.
      * @param dstOff     Offset into dest data, in samples-per-channel.
      * @return error code
      */
@@ -192,7 +192,7 @@ public final class JavSampleFormat {
                                    int dstOff );
 
     /**
-     * Fill an audio buffer with silence.
+     * Fill an audio nativeBuffer with silence.
      *
      * @param dataPtr  [uint8_t**]-type pointer to data array.
      * @param dataOff  Offset into data in samples-per-channel.
