@@ -11,6 +11,7 @@ import bits.jav.codec.*;
 import bits.jav.format.*;
 import bits.jav.swscale.SwsContext;
 import bits.jav.util.*;
+import bits.util.gui.ImagePanel;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -31,9 +32,8 @@ public class TestReadVideo {
 
     static void testReadVideo() throws Exception {
         Jav.init();
-        File file = new File( "resources_build/video.mp4" );
-        
-        //File file = new File("/d/data/bits/CNN_2010-12-15T1801.ts");
+        File file = new File( "src/test/resources/test.mp4" );
+
         JavFormatContext format = JavFormatContext.openInput( file );
         JavStream stream        = format.stream(0);
         JavCodecContext cc      = stream.codecContext();

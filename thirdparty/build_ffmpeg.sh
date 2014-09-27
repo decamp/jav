@@ -66,7 +66,7 @@ for cmd in ${cmds[@]}; do
       make install
       
       # Make library paths relative.
-      $projdir/buildtools/rename_dylib $scratch/lib @loader_path
+      $projdir/buildtools/rename_dylib $scratch/lib @loader_path true
             
       # Move libraries into place.
       names[0]=libavutil

@@ -59,10 +59,10 @@ def change_install_paths( dir, newPath, removeVersion=False ):
     for name in linkMap.keys():
         links = linkMap[name]
         f = os.path.join( dir, name )
-        
+
         if len( links ) == 0:
             continue
-            
+
         if removeVersion:
             name = _remove_version( name )
         
@@ -70,7 +70,6 @@ def change_install_paths( dir, newPath, removeVersion=False ):
 
         for linkPath in links[1:]:
             srcLib = _file_name( linkPath )
-            
             if removeVersion:
                 dstLib = _remove_version( srcLib )
             else:
@@ -90,13 +89,15 @@ def _file_name( path ):
 def _remove_version( name ):
     ## Remove components of name surrounded by periods that contain only digits.
     pat = re.compile( '^\\d+$' )
-    
     while True:
         n1 = name.rfind( '.' )
-        if n1 < 0: break
+        if n1 < 0: 
+            break
         n0 = name.rfind( '.', 0, n1 - 1 )
-        if n0 < 0: break
-        if pat.match( name[n0+1:n1] ) == None : break
+        if n0 < 0: 
+            break
+        if pat.match( name[n0+1:n1] ) == None: 
+            break
         name = name[:n0] + name[n1:]
     return name
         
@@ -116,11 +117,11 @@ def _change_install_path( file, toPath ):
 if __name__ == '__main__':
     remove_version = False
     if len( sys.argv ) < 3 or sys.argv[1] == '--help':
-        print "rename_dylib <dir containing dylibs or single dylib> <install_path> [\"false\" indicates remove version numbers]"
+        print "rename_dylib <dir containing dylibs or single dylib> <install_path> [\"true\" indicates remove version numbers]"
         sys.exit()
         
     if len( sys.argv ) > 3:
         n = sys.argv[3].lower();
-        remove_version = not n.startswith('n') and not n.startswith('f') and not n.startswith('0')
+        remove_version = n.startswith('t') or n.startswith('y') or n.startswith('1')
     
     change_install_paths( sys.argv[1], sys.argv[2], remove_version )

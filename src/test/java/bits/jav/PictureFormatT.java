@@ -15,11 +15,11 @@ import bits.jav.util.Rational;
 /**
  * @author decamp
  */
-public class PictureFormatT {
+public class PictureFormatt {
 
 
-    public static PictureFormatT fromCodecContext( JavCodecContext cc ) {
-        return new PictureFormatT( cc.width(), cc.height(), cc.pixelFormat(), cc.sampleAspectRatio() );
+    public static PictureFormatt fromCodecContext( JavCodecContext cc ) {
+        return new PictureFormatt( cc.width(), cc.height(), cc.pixelFormat(), cc.sampleAspectRatio() );
     }
 
 
@@ -39,14 +39,14 @@ public class PictureFormatT {
      *            be {@code null}.
      * @return PictureFormat containing merged values taken from input.
      */
-    public static PictureFormatT merge( PictureFormatT source, PictureFormatT dest ) {
+    public static PictureFormatt merge( PictureFormatt source, PictureFormatt dest ) {
         if( source == null )
-            return dest == null ? new PictureFormatT() : dest;
+            return dest == null ? new PictureFormatt() : dest;
 
         if( dest == null )
             return source;
 
-        return new PictureFormatT( dest.mWidth >= 0 ? dest.mWidth : source.mWidth,
+        return new PictureFormatt( dest.mWidth >= 0 ? dest.mWidth : source.mWidth,
                                    dest.mHeight >= 0 ? dest.mHeight : source.mHeight,
                                    dest.mPixelFormat != AV_PIX_FMT_NONE ? dest.mPixelFormat : source.mPixelFormat,
                                    dest.mSampleAspect != null ? dest.mSampleAspect : source.mSampleAspect );
@@ -66,7 +66,7 @@ public class PictureFormatT {
      * @param pixelFormat
      *            PixelFormat of picture, or -1 (PIX_FMT_NONE) if undefined.
      */
-    public PictureFormatT( int width, int height, int pixelFormat ) {
+    public PictureFormatt( int width, int height, int pixelFormat ) {
         this( width, height, pixelFormat, null );
     }
 
@@ -80,7 +80,7 @@ public class PictureFormatT {
      * @param sampleAspect
      *            Aspect ratio of samples (pixels).
      */
-    public PictureFormatT( int width, int height, int pixelFormat, Rational sampleAspect ) {
+    public PictureFormatt( int width, int height, int pixelFormat, Rational sampleAspect ) {
         mWidth = width >= 0 ? width : -1;
         mHeight = height >= 0 ? height : -1;
         mPixelFormat = pixelFormat;
@@ -88,7 +88,7 @@ public class PictureFormatT {
     }
 
 
-    private PictureFormatT() {
+    private PictureFormatt() {
         this( -1, -1, AV_PIX_FMT_NONE, null );
     }
 
@@ -134,10 +134,10 @@ public class PictureFormatT {
 
     @Override
     public boolean equals( Object obj ) {
-        if( !(obj instanceof PictureFormatT) )
+        if( !(obj instanceof PictureFormatt) )
             return false;
 
-        PictureFormatT p = (PictureFormatT)obj;
+        PictureFormatt p = (PictureFormatt)obj;
 
         if( mWidth != p.mWidth ||
             mHeight != p.mHeight ||

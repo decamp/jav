@@ -1,13 +1,14 @@
-### JAV = Java wrapper for FFMPEG
-
-
-#### Supported Platforms: OS X 64-bit
+### JAV - Java Audio Video
+##### An FFMPEG Wrapper
+##### Supports: OS X 64-bit
 
 JAV stands for "Java Audio Video library". It is a wrapper for FFMPEG. Through FFMPEG, this library can:
 - Encode or decode audio/video streams using most major compression formats (h264,mp3,aac,etc.)
 - Read/write media files using most major file formats (mp4,mov,flv,etc.)
 - Rescale images
 - Resample audio
+
+This project also includes pre-compiled versions of the FFMPEG, X264, and LAME libraries that are portable and can be included with an application without system install.
 
 There are many partial FFMPEG wrappers. This one is simply mine that I keep up-to-spec for my own projects. Automatic wrapping for FFMPEG is difficult because of memory management issues. This wrapper includes an attempt to make some of the memory management slightly more doable from Java with minimal overhead. That said, there are a lot of places in here where pointers are passed around as long values, so this is not for JavaBeaners that are feint of hearts.
 
@@ -28,7 +29,7 @@ There is also some light code generate code located in "src/gen/java". There are
 
 
 ### Runtime:
-After build, add all jars, dylibs, and jnilibs in **lib** and **target** folders to your project. Note that the jnilib/dylib files must be kept in the same directory, and that directory must be added to your java.library.path runtime property ("java -Djava.library.path=lib_dir")
+After build, add all jars, dylibs, and jnilibs in **lib** and **target** folders to your project. All jnilib and dylib files must be kept in the same directory (unless you update the install paths), and that directory must be added to your java.library.path runtime property ("java -Djava.library.path=lib_dir")
 
 
 ### Dependencies:
@@ -37,26 +38,29 @@ ffmpeg
 - Located in "thirdparty/ffmpeg" as git submodule.
 - License: Most is under LGPL, but some is GPL v2. See "thirdparty/ffmpeg/LICENSE.md"
 - Web: <https://www.ffmpeg.org/>
+
 x264
 - H264 codec.
 - Located in "thirdparty/x264" as git submodule.
 - License: GPL v2. See "thirdparty/x264/COPYING"
 - Web: <http://www.videolan.org/developers/x264.html>
+
 lame
 - MP3 codec
 - Located in "thirdparty/lame-3.99.5" as zipped project folder.
 - License: LGPL. See "thirdparty/lame-3.99.5.zip/LICENSE"
 - Web: <http://lame.sourceforge.net/>
+
 bits_langx.jar 
 - Used for ref counting and object pools.
 - License: Same as JAV.
 
 
 ### Gotchas
-FFMPEG has updated its memory ownership model using the AVBufferRef class, and this
-wrapper does not support this very fully. Be sure to check JavCodecContext.refcountedFrames(),
-and set it to TRUE/NON-ZERO if you want to manage your own frame pool, or set it to false
-and ALWAYS make safe copies of decoded frames.
+FFMPEG has updated its memory ownership model using the AVBufferRef class. Support for this
+has not been tested very fully. Be sure to check JavCodecContext.refcountedFrames(),
+and set it to **true** if you want to manage your own frame pool, or set it to **false**
+and **ALWAYS** make safe copies of decoded frames.
 
 
 ---

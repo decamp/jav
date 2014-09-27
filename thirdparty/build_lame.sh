@@ -61,7 +61,7 @@ for cmd in ${cmds[@]}; do
       cd $workdir
       make install
       # Make library paths relative.
-      $projdir/buildtools/rename_dylib $scratch/lib @loader_path
+      $projdir/buildtools/rename_dylib $scratch/lib @loader_path true
       cp $scratch/lib/libmp3lame.0.dylib $projdir/lib/libmp3lame.dylib
       ;;
 

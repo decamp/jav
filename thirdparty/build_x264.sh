@@ -52,7 +52,7 @@ for cmd in ${cmds[@]}; do
       mv ${scratch}/lib/libx264.142.dylib ${scratch}/lib/libx264.dylib
       
       # Make library paths relative.
-      ${projdir}/buildtools/rename_dylib ${scratch}/lib @loader_path
+      ${projdir}/buildtools/rename_dylib ${scratch}/lib @loader_path true
       
       cp ${scratch}/lib/libx264.dylib ${projdir}/lib/libx264.dylib
       ;;
