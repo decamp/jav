@@ -14,9 +14,6 @@ import bits.jav.format.JavIOContext;
 import java.io.File;
 
 
-/**
- * @author Philip DeCamp
- */
 public class TestFormatAvio {
 
     public static void main( String[] args ) throws Exception {

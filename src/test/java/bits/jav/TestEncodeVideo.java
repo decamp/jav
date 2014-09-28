@@ -20,9 +20,6 @@ import java.nio.channels.FileChannel;
 import static bits.jav.Jav.*;
 
 
-/**
- * @author decamp
- */
 public class TestEncodeVideo {
 
     public static void main( String[] args ) throws Exception {

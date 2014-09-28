@@ -43,8 +43,6 @@ import static bits.jav.Jav.*;
  * SWS_SPLINE            1951467852                6.719
  * SWS_SINC              1902084412               13.2753
  *
- *
- * @author decamp
  */
 public final class SwsContext implements JavClass {
     

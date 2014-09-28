@@ -16,9 +16,7 @@ import bits.jav.format.*;
 import bits.jav.util.*;
 import static bits.jav.Jav.*;
 
-/**
- * @author decamp
- */
+
 public class TestEncodeMp3 {
 
 

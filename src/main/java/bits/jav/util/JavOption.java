@@ -14,8 +14,6 @@ import static bits.jav.Jav.*;
 
 /**
  * Used for getting and setting options on JavClasses.
- * 
- * @author decamp
  */
 public final class JavOption implements NativeObject {
     

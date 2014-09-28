@@ -15,10 +15,30 @@ import bits.util.ref.*;
 
 
 /**
- * @author decamp
+ * This structure describes decoded (raw) audio or video data.
+ *
+ * <p>AVFrame must be allocated using one of the alloc() methods.
+ * AVFrames are reference counted. See {@link bits.util.ref.Refable}.
+ *
+ * <p>AVFrame is typically allocated once and then reused multiple times to hold
+ * different data (e.g. a single AVFrame to hold frames received from a
+ * decoder). In such a case, av_frame_unref() will free any references held by
+ * the frame and reset it to its original clean state before it
+ * is reused again.
  */
 public class JavFrame extends AbstractRefable implements NativeObject {
-    
+    /*
+     * TODO: Fix reference counting to match original doc:
+     * <p>The data described by an AVFrame is usually reference counted through the
+     * AVBuffer API. The underlying buffer references are stored in AVFrame.buf /
+     * AVFrame.extended_buf. An AVFrame is considered to be reference counted if at
+     * least one reference is set, i.e. if AVFrame.buf[0] != NULL. In such a case,
+     * every single data plane must be contained in one of the buffers in
+     * AVFrame.buf or AVFrame.extended_buf.
+     * There may be a single buffer for all the data, or one separate buffer for
+     * each plane, or anything in between.
+     */
+
     /** Number of data pointers in frame.data[] field. */
     @Deprecated public static final int AV_NUM_DATA_POINTERS = 8;
     
@@ -962,7 +982,6 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * <p>
      * Copies data from one of the frame layers to a natively allocated ByteBuffer.
      *
-     * @param srcLayer
      * @param dst       Byte nativeBuffer with position and limit set.
      */
     @Deprecated public void readData( int srcLayer, ByteBuffer dst ) {

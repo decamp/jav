@@ -9,9 +9,7 @@ package bits.jav.util;
 
 import java.nio.ByteBuffer;
 
-/**
- * @author Philip DeCamp
- */
+
 public final class JavSampleFormat {
 
     /**

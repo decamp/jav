@@ -7,9 +7,6 @@
 
 package bits.jav.swscale;
 
-/**
- * @author decamp
- */
 final class ColorSpaces {
     static final int[][] FF_YUV2RGB_COEFFS = {
         { 117504, 138453, 13954, 34903 }, /* no sequence_display_extension */

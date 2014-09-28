@@ -8,9 +8,6 @@
 package bits.jav.util;
 
 
-/**
- * @author decamp (Based primarily on FFMPEG code.)
- */
 public final class Rational {
 
     public static final int AV_ROUND_ZERO        = 0; ///< Round toward zero.

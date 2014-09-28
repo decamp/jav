@@ -11,8 +11,28 @@ import bits.jav.util.*;
 import bits.util.ref.*;
 
 /**
- * @author decamp
+ * This structure stores compressed data. It is typically exported by demuxers
+ * and then passed as input to decoders, or received as output from encoders and
+ * then passed to muxers.
+ *
+ * <p>For video, it should typically contain one compressed frame. For audio it may
+ * contain several compressed frames.
+ *
+ * <p>AVPacket is one of the few structs in FFmpeg, whose size is a part of public
+ * ABI. Thus it may be allocated on stack and no new fields can be added to it
+ * without libavcodec and libavformat major bump.
+ *
+ * <p>The semantics of data ownership depends on the buf or destruct (deprecated)
+ * fields. If either is set, the packet data is dynamically allocated and is
+ * valid indefinitely until av_free_packet() is called (which in turn calls
+ * av_buffer_unref()/the destruct callback to free the data). If neither is set,
+ * the packet data is typically backed by some static buffer somewhere and is
+ * only valid for a limited time (e.g. until the next read call when demuxing).
+ *
+ * <p>The side data is always allocated with av_malloc() and is freed in
+ * av_free_packet().
  */
+
 public final class JavPacket extends AbstractRefable implements NativeObject {
 
     

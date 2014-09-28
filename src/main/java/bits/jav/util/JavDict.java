@@ -7,9 +7,7 @@
 
 package bits.jav.util;
 
-/**
- * @author decamp
- */
+
 public class JavDict implements NativeObject {
     
     public static final int MATCH_CASE       =  1;

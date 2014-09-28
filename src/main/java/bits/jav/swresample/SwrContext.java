@@ -16,15 +16,14 @@ import java.nio.ByteBuffer;
 
 
 /**
- *
  * Libswresample (lswr) is a library that handles audio resampling, sample
  * format conversion and mixing.
  *
- * Interaction with lswr is done through SwrContext, which is
+ * <p>Interaction with lswr is done through SwrContext, which is
  * allocated with swr_alloc() or swr_alloc_set_opts(). It is opaque, so all parameters
  * must be set with the @ref avoptions API.
  *
- * For example the following code will setup conversion from planar float sample
+ * <p>For example the following code will setup conversion from planar float sample
  * format to interleaved signed 16-bit integer, downsampling from 48kHz to
  * 44.1kHz and downmixing from 5.1 channels to stereo (using the default mixing
  * matrix):
@@ -38,12 +37,12 @@ import java.nio.ByteBuffer;
  * av_opt_set_sample_fmt(swr, "out_sample_fmt", AV_SAMPLE_FMT_S16,  0);
  * }
  *
- * Once all values have been set, it must be initialized with swr_init(). If
+ * <p>Once all values have been set, it must be initialized with swr_init(). If
  * you need to change the conversion parameters, you can change the parameters
  * as described above, or by using swr_alloc_set_opts(), then call swr_init()
  * again.
  *
- * The conversion itself is done by repeatedly calling swr_convert().
+ * <p>The conversion itself is done by repeatedly calling swr_convert().
  * Note that the samples may get buffered in swr if you provide insufficient
  * output space or if sample rate conversion is done, which requires "future"
  * samples. Samples that do not require future input can be retrieved at any
@@ -51,10 +50,10 @@ import java.nio.ByteBuffer;
  * At the end of conversion the resampling nativeBuffer can be flushed by calling
  * swr_convert() with NULL in and 0 in_count.
  *
- * The delay between input and output, can at any time be found by using
+ * <p>The delay between input and output, can at any time be found by using
  * swr_get_delay().
  *
- * The following code demonstrates the conversion loop assuming the parameters
+ * <p>The following code demonstrates the conversion loop assuming the parameters
  * from above and caller-defined functions get_input() and handle_output():
  * { @code
  * uint8_t **input;
@@ -73,12 +72,10 @@ import java.nio.ByteBuffer;
  * }
  * }
  *
- * When the conversion is finished, the conversion
+ * <p>When the conversion is finished, the conversion
  * context and everything associated with it must be freed with swr_free().
  * There will be no memory leak if the data is not completely flushed before
  * swr_free().
- *
- * @author Philip DeCamp
  */
 public class SwrContext implements JavClass {
 

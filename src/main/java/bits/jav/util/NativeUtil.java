@@ -11,9 +11,8 @@ import java.nio.*;
 
 
 /**
-* @author decamp
-* @deprecated {@see bits.jav.JavMem}
-*/
+ * @deprecated {@see bits.jav.JavMem}
+ */
 @Deprecated public class NativeUtil {
 
     /**

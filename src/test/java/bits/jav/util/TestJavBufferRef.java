@@ -16,9 +16,6 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 
-/**
- * @author decamp
- */
 public class TestJavBufferRef {
 
 

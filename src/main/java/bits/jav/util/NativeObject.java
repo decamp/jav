@@ -7,9 +7,7 @@
 
 package bits.jav.util;
 
-/**
- * @author decamp
- */
+
 public interface NativeObject {
     
     /**

@@ -14,9 +14,7 @@ import bits.jav.Jav;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-/**
- * @author Philip DeCamp
- */
+
 public class TestJavBufferPool {
 
     public TestJavBufferPool() {

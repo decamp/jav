@@ -19,9 +19,6 @@ import static bits.jav.Jav.*;
 import static bits.jav.JavException.assertNoErr;
 
 
-/**
- * @author decamp
- */
 public class TestEncodeFormat {
 
     

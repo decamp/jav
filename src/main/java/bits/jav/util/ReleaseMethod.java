@@ -7,9 +7,7 @@
 
 package bits.jav.util;
 
-/**
- * @author decamp
- */
+
 public enum ReleaseMethod {
     SELF,   /** Object will release itself, if necessary, although it may be recommended to release object earlier. */ 
     OWNER,  /** Object is "owned" by another object that will release it. */

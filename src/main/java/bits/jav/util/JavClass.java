@@ -10,7 +10,5 @@ package bits.jav.util;
 /**
  * Indicates that a class wraps around a AVClass type struct.
  * See JavOption to manipulate the "Options" of a JavClass instance.
- * 
- * @author decamp
  */
 public interface JavClass extends NativeObject {}

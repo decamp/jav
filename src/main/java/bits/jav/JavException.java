@@ -10,9 +10,6 @@ package bits.jav;
 import java.io.IOException;
 
 
-/**
- * @author decamp
- */
 public class JavException extends IOException {
 
 

@@ -16,9 +16,7 @@ import bits.jav.util.*;
 
 
 
-/**
- * @author decamp
- */
+
 public final class JavFormatContext implements JavClass {
     
     /**

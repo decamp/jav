@@ -12,7 +12,12 @@ import bits.jav.util.*;
 
 
 /**
- * @author decamp
+ * main external API structure.
+ *
+ * Please use AVOptions (av_opt* / av_set/get*()) to access these fields from user
+ * applications.
+ *
+ * sizeof(AVCodecContext) must not be used outside libav*.
  */
 public final class JavCodecContext implements JavClass {
 

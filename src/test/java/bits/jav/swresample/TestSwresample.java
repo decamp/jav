@@ -18,9 +18,6 @@ import bits.jav.util.*;
 import static bits.jav.Jav.*;
 
 
-/**
- * @author Philip DeCamp
- */
 public class TestSwresample {
 
     public static void main( String[] args ) throws Exception {

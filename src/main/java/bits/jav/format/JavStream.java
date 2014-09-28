@@ -11,7 +11,7 @@ import bits.jav.codec.JavCodecContext;
 import bits.jav.util.*;
 
 /**
- * @author decamp
+ * Wrapper for AVStream structure.
  */
 public final class JavStream implements NativeObject {
     

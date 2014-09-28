@@ -10,7 +10,7 @@ package bits.jav.format;
 import bits.jav.util.*;
 
 /**
- * @author decamp
+ * Wrapper ofr AVOutputFormat.
  */
 public class JavOutputFormat implements NativeObject {
     

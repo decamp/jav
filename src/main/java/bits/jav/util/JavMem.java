@@ -17,8 +17,6 @@ import java.nio.ByteBuffer;
  * in FFMPEG: av_malloc, av_free, etc.
  * <p>
  * Dangerous. None of these methods throw exceptions. Many will crash the JVM if not used correctly.
- *
- * @author Philip DeCamp
  */
 public final class JavMem {
 

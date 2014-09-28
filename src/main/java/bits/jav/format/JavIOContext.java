@@ -12,7 +12,7 @@ import bits.jav.util.ReleaseMethod;
 
 
 /**
- * @author Philip DeCamp
+ * Bytestream IO Context.
  */
 public class JavIOContext implements JavClass {
 

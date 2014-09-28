@@ -9,8 +9,9 @@ package bits.jav.codec;
 
 import bits.jav.util.*;
 
+
 /**
- * @author decamp
+ * Wrapper for AVCodec object.
  */
 public class JavCodec implements NativeObject {
 
