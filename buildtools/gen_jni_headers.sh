@@ -22,6 +22,7 @@ names+=" bits.jav.util.JavBufferRef"
 names+=" bits.jav.util.JavBufferPool"
 names+=" bits.jav.util.JavMem"
 names+=" bits.jav.util.JavSampleFormat"
+names+=" bits.jav.util.JavChannelLayout"
 names+=" bits.jav.format.JavIOContext"
 names+=" bits.jav.swresample.SwrContext"
 

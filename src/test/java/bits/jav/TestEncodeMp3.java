@@ -9,7 +9,6 @@ package bits.jav;
 
 import java.io.*;
 import java.nio.*;
-import java.nio.channels.FileChannel;
 
 import bits.jav.codec.*;
 import bits.jav.format.*;
@@ -231,7 +230,7 @@ public class TestEncodeMp3 {
                            cc.channels(),
                            cc.channelLayout(),
                            cc.sampleRate(),
-                           JavSampleFormat.getSampleFormatName( cc.sampleFormat() ) );
+                           JavSampleFormat.getName( cc.sampleFormat() ) );
         JavFrame frame = JavFrame.alloc();
 
         //Open decodec.

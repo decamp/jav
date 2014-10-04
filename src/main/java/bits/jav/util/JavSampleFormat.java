@@ -13,16 +13,14 @@ import java.nio.ByteBuffer;
 public final class JavSampleFormat {
 
     /**
-     * @return name of fmt, or null if not recognized.
-     */
-    public static native String getSampleFormatName( int fmt );
-
-
-    /**
      * @return a sample format corresponding to name, or AV_SAMPLE_FMT_NONE on error.
      */
-    public static native int getSampleFormat( String name );
+    public static native int get( String name );
 
+    /**
+     * @return name of fmt, or null if not recognized.
+     */
+    public static native String getName( int fmt );
 
     /**
      * @return the planar<->packed alternative form of the given sample format, or
@@ -30,8 +28,7 @@ public final class JavSampleFormat {
      *         requested planar/packed format, the format returned is the same as the
      *         input.
      */
-    public static native int getAltSampleFormat( int fmt, int planar );
-
+    public static native int getAlt( int fmt, int planar );
 
     /**
      * Generate a string corresponding to the sample format with
@@ -43,8 +40,8 @@ public final class JavSampleFormat {
      *            corresponding header.
      * @return true if succesful, false if fmt is unknown or other errors.
      */
-    public static boolean getSampleFormatString( ByteBuffer buf, int fmt ) {
-        long n = nGetSampleFormatString( buf, buf.position(), buf.remaining(), fmt );
+    public static boolean getString( ByteBuffer buf, int fmt ) {
+        long n = nGetString( buf, buf.position(), buf.remaining(), fmt );
         return n != 0;
     }
 
@@ -62,7 +59,7 @@ public final class JavSampleFormat {
      * @param format the sample format to inspect
      * @return true if sample format is planar, false if interleaved.
      */
-    public static native boolean isFormatPlanar( int format );
+    public static native boolean isPlanar( int format );
 
 
     /**
@@ -205,7 +202,7 @@ public final class JavSampleFormat {
                                          int sampFmt );
 
 
-    private static native long nGetSampleFormatString( ByteBuffer buf, int off, int len, int fmt );
+    private static native long nGetString( ByteBuffer buf, int off, int len, int fmt );
 
 
     private JavSampleFormat() {}

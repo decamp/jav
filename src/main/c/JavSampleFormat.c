@@ -11,15 +11,7 @@
 #include "libavutil/frame.h"
 
 
-JNIEXPORT jstring JNICALL Java_bits_jav_util_JavSampleFormat_getSampleFormatName
-( JNIEnv *env, jclass clazz, jint fmt )
-{
-    const char *str = av_get_sample_fmt_name( fmt );
-    return str ? (*env)->NewStringUTF( env, str ) : NULL;
-}
-
-
-JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_getSampleFormat
+JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_get
 ( JNIEnv *env, jclass clazz, jstring fmt )
 {
     const char *cfmt = ( fmt == NULL ? NULL : (*env)->GetStringUTFChars( env, fmt, NULL ) );
@@ -31,14 +23,22 @@ JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_getSampleFormat
 }
 
 
-JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_getAltSampleFormat
+JNIEXPORT jstring JNICALL Java_bits_jav_util_JavSampleFormat_getName
+( JNIEnv *env, jclass clazz, jint fmt )
+{
+    const char *str = av_get_sample_fmt_name( fmt );
+    return str ? (*env)->NewStringUTF( env, str ) : NULL;
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_getAlt
 ( JNIEnv *env, jclass clazz, jint fmt, jint planar )
 {
     return av_get_alt_sample_fmt( fmt, planar );
 }
 
 
-JNIEXPORT jlong JNICALL Java_bits_jav_util_JavSampleFormat_nGetSampleFormatString
+JNIEXPORT jlong JNICALL Java_bits_jav_util_JavSampleFormat_nGetString
 ( JNIEnv *env, jclass clazz, jobject jbuf, jint bufOff, jint bufSize, jint fmt )
 {
     char *cbuf = (*env)->GetDirectBufferAddress( env, jbuf ) + bufOff;
@@ -54,7 +54,7 @@ JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_getBytesPerSample
 }
 
 
-JNIEXPORT jboolean JNICALL Java_bits_jav_util_JavSampleFormat_isFormatPlanar
+JNIEXPORT jboolean JNICALL Java_bits_jav_util_JavSampleFormat_isPlanar
 ( JNIEnv *env, jclass clazz, jint fmt )
 {
     return av_sample_fmt_is_planar( fmt ) ? JNI_TRUE : JNI_FALSE;

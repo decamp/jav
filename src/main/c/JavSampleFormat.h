@@ -9,26 +9,26 @@ extern "C" {
 #endif
 /*
  * Class:     bits_jav_util_JavSampleFormat
- * Method:    getSampleFormatName
- * Signature: (I)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_bits_jav_util_JavSampleFormat_getSampleFormatName
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     bits_jav_util_JavSampleFormat
- * Method:    getSampleFormat
+ * Method:    get
  * Signature: (Ljava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_getSampleFormat
+JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_get
   (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     bits_jav_util_JavSampleFormat
- * Method:    getAltSampleFormat
+ * Method:    getName
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_bits_jav_util_JavSampleFormat_getName
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     bits_jav_util_JavSampleFormat
+ * Method:    getAlt
  * Signature: (II)I
  */
-JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_getAltSampleFormat
+JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_getAlt
   (JNIEnv *, jclass, jint, jint);
 
 /*
@@ -41,10 +41,10 @@ JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_getBytesPerSample
 
 /*
  * Class:     bits_jav_util_JavSampleFormat
- * Method:    isFormatPlanar
+ * Method:    isPlanar
  * Signature: (I)Z
  */
-JNIEXPORT jboolean JNICALL Java_bits_jav_util_JavSampleFormat_isFormatPlanar
+JNIEXPORT jboolean JNICALL Java_bits_jav_util_JavSampleFormat_isPlanar
   (JNIEnv *, jclass, jint);
 
 /*
@@ -81,10 +81,10 @@ JNIEXPORT jint JNICALL Java_bits_jav_util_JavSampleFormat_setSilence
 
 /*
  * Class:     bits_jav_util_JavSampleFormat
- * Method:    nGetSampleFormatString
+ * Method:    nGetString
  * Signature: (Ljava/nio/ByteBuffer;III)J
  */
-JNIEXPORT jlong JNICALL Java_bits_jav_util_JavSampleFormat_nGetSampleFormatString
+JNIEXPORT jlong JNICALL Java_bits_jav_util_JavSampleFormat_nGetString
   (JNIEnv *, jclass, jobject, jint, jint, jint);
 
 #ifdef __cplusplus

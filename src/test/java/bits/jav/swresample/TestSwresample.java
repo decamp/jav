@@ -165,7 +165,7 @@ public class TestSwresample {
                            cc.channels(),
                            cc.channelLayout(),
                            cc.sampleRate(),
-                           JavSampleFormat.getSampleFormatName( cc.sampleFormat() ) );
+                           JavSampleFormat.getName( cc.sampleFormat() ) );
 
 
 
