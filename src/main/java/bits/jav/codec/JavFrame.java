@@ -9,6 +9,7 @@ package bits.jav.codec;
 
 import java.nio.*;
 
+import bits.jav.Jav;
 import bits.jav.JavException;
 import bits.jav.util.*;
 import bits.util.ref.*;
@@ -27,6 +28,7 @@ import bits.util.ref.*;
  * is reused again.
  */
 public class JavFrame extends AbstractRefable implements NativeObject {
+
     /*
      * TODO: Fix reference counting to match original doc:
      * <p>The data described by an AVFrame is usually reference counted through the
@@ -67,8 +69,9 @@ public class JavFrame extends AbstractRefable implements NativeObject {
             throw new OutOfMemoryError();
         }
 
-        int size = nComputeVideoBufferSize( w, h, pixFormat );
-        ByteBuffer buf = ByteBuffer.allocateDirect( size );
+        int size = nComputeVideoBufferSize( w, h, pixFormat ) + Jav.FF_INPUT_BUFFER_PADDING_SIZE;
+        size = Math.max( size, Jav.FF_MIN_BUFFER_SIZE );
+        ByteBuffer buf = Jav.allocBuffer( size );
         buf.order( ByteOrder.nativeOrder() );
 
         return allocVideo( w, h, pixFormat, buf, optPool );
@@ -102,7 +105,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
                                        ObjectPool<? super JavFrame> optPool )
     {
         int size = JavSampleFormat.getBufferSize( channels, samplesPerChannel, sampleFormat, align, null );
-        ByteBuffer buf = ByteBuffer.allocateDirect( size );
+        ByteBuffer buf = Jav.allocBuffer( size );
         buf.order( ByteOrder.nativeOrder() );
         return allocAudio( channels, samplesPerChannel, sampleFormat, align, buf, optPool );
     }
@@ -670,6 +673,13 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     }
 
     /**
+     * @return Useable size of data buffer (size - padding)
+     */
+    public int useableBufElemSize( int layer ) {
+        return Math.max( 0, nBufElemSize( mPointer, layer ) - Jav.FF_INPUT_BUFFER_PADDING_SIZE );
+    }
+
+    /**
      * @return direct pointer to extended_buf field.
      */
     public long extendedBuf() {
@@ -732,6 +742,13 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     }
 
     /**
+     * @return Useable size of data buffer (size - padding)
+     */
+    public int useableExtendedBufElemSize( int layer ) {
+        return Math.max( 0, nExtendedBufElemSize( mPointer, layer ) - Jav.FF_INPUT_BUFFER_PADDING_SIZE );
+    }
+
+    /**
      * Number of elements in extended_buf.
      * @see #extendedBuf()
      */
@@ -746,6 +763,20 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      */
     public void nbExtendedBuf( int num ) {
         nNbExtendedBuf( mPointer, num );
+    }
+
+    /**
+     * @return count of all buffers
+     */
+    public int nbAllBufs() {
+        return nNbAllBufs( mPointer );
+    }
+
+    /**
+     * @return sizeof smallest buffer.
+     */
+    public int allBufsMinUseableSize() {
+        return Math.max( 0, nAllBufsMinSize( mPointer ) - Jav.FF_INPUT_BUFFER_PADDING_SIZE );
     }
 
 
@@ -907,10 +938,8 @@ public class JavFrame extends AbstractRefable implements NativeObject {
             throw new RuntimeException( "Unknown exception filling nativeBuffer: " + bytes );
         }
     }
-    
-    
-    
-    
+
+
     /**
      * Native 
      */
@@ -1022,13 +1051,19 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     private static native long nBufElem( long pointer, int idx );
     private static native void nBufElem( long pointer, int idx, long ref );
     private static native ByteBuffer nJavaBufElem( long pointer, int idx );
+    private static native int  nBufElemSize( long pointer, int layer );
     private static native long nExtendedBuf( long pointer );
     private static native void nExtendedBuf( long pointer, long bufPointer );
     private static native long nExtendedBufElem( long pointer, int idx );
     private static native void nExtendedBufElem( long pointer, int idx, long ref );
     private static native ByteBuffer nJavaExtendedBufElem( long pointer, int idx );
+    private static native int  nExtendedBufElemSize( long pointer, int layer );
     private static native int  nNbExtendedBuf( long pointer );
     private static native void nNbExtendedBuf( long pointer, int nb );
+
+    private static native int  nNbAllBufs( long pointer );
+    private static native int  nAllBufsMinSize( long pointer );
+
 
     private static native long nBestEffortTimestamp( long pointer );
     private static native long nPktPos( long pointer );
@@ -1091,7 +1126,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * @param layer   Layer in data to get. May crash JVM if out-of-bounds.
      * @return A value of type: uint8_t*
      */
-    public long dataPointer( int layer ) {
+    @Deprecated public long dataPointer( int layer ) {
         return nDataElem( mPointer, layer );
     }
 
@@ -1101,7 +1136,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * @param layer   Layer in data to set. May crash JVM if out-of-bounds.
      * @param pointer A value of type: uint8_t*
      */
-    public void dataPointer( int layer, long pointer ) {
+    @Deprecated public void dataPointer( int layer, long pointer ) {
         nDataElem( mPointer, layer, pointer );
     }
 
@@ -1111,7 +1146,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * @param out Array of length [Jav.AV_NUM_DATA_POINTERS].
      *            Will receive values of type uint8_t*.
      */
-    public void dataPointers( long[] out ) {
+    @Deprecated public void dataPointers( long[] out ) {
         nDataElem( mPointer, out );
     }
 
@@ -1131,7 +1166,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      *
      * @return pointer of type uint8_t*
      */
-    public long extendedDataPointer( int layer ) {
+    @Deprecated public long extendedDataPointer( int layer ) {
         return nExtendedDataElem( mPointer, layer );
     }
 
@@ -1149,7 +1184,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * but for planar audio with more channels that can fit in data,
      * extended_data must be used in order to access all channels.
      */
-    public void extendedDataPointer( int layer, long planePointer ) {
+    @Deprecated public void extendedDataPointer( int layer, long planePointer ) {
         nExtendedDataElem( mPointer, layer, planePointer );
     }
 

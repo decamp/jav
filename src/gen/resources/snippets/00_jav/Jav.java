@@ -20,3 +20,15 @@ public static void assertOkay( int err ) throws JavException {
         throw JavException.fromErr( err );
     }
 }
+
+
+/**
+ * Use this method to allocate ByteBuffers.
+ * It will set up appropriate byte ordering and
+ * necessary padding.
+ */
+public static ByteBuffer allocBuffer( int size ) {
+    ByteBuffer ret = ByteBuffer.allocateDirect( size + FF_INPUT_BUFFER_PADDING_SIZE );
+    return ret.order( ByteOrder.nativeOrder() );
+}
+

@@ -168,6 +168,14 @@ JNIEXPORT jobject JNICALL Java_bits_jav_codec_JavFrame_nJavaBufElem
 }
 
 
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nBufElemSize
+( JNIEnv *env, jclass clazz, jlong pointer, jint idx )
+{
+    AVBufferRef *ref = (**(AVFrame**)&pointer).buf[idx];
+    return ref ? ref->size : 0;
+}
+
+
 JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nExtendedBuf__J
 ( JNIEnv *env, jclass clazz, jlong pointer )
 {
@@ -212,7 +220,15 @@ JNIEXPORT jobject JNICALL Java_bits_jav_codec_JavFrame_nJavaExtendedBufElem
 ( JNIEnv *env, jclass clazz, jlong pointer, jint idx )
 {
     AVFrame *frame = *(AVFrame**)&pointer;
-    return jav_buffer_unwrap_bytebuffer( frame->buf[idx] );
+    return jav_buffer_unwrap_bytebuffer( frame->extended_buf[idx] );
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nExtendedBufElemSize
+( JNIEnv *env, jclass clazz, jlong pointer, jint idx )
+{
+    AVBufferRef *ref = (**(AVFrame**)&pointer).extended_buf[idx];
+    return ref ? ref->size : 0;
 }
 
 
@@ -227,6 +243,61 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nNbExtendedBuf__JI
 ( JNIEnv *env, jclass clazz, jlong pointer, jint val )
 {
     (*(AVFrame*)&pointer).nb_extended_buf = val;
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nNbAllBufs
+( JNIEnv *env, jclass clazz, jlong pointer )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    int ret = 0;
+    for(; ret < AV_NUM_DATA_POINTERS; ret++ ) {
+        if( frame->buf[ret] == NULL ) {
+            return ret;
+        }
+    }
+
+    for( int i = 0; i < frame->nb_extended_buf; i++ ) {
+        if( frame->extended_buf[ret] ) {
+            ret++;
+        }
+    }
+
+    return ret;
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nAllBufsMinSize
+( JNIEnv *env, jclass clazz, jlong pointer )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    int ret = 0;
+
+    for( int i = 0; i < AV_NUM_DATA_POINTERS; i++ ) {
+        AVBufferRef *ref = frame->buf[ret];
+        if( ref ) {
+            if( i == 0 ) {
+                ret = ref->size;
+            } else if( ref->size < ret ) {
+                ret = ref->size;
+            }
+        } else {
+            return ret;
+        }
+    }
+
+    for( int i = 0; i < frame->nb_extended_buf; i++ ) {
+        AVBufferRef *ref = frame->extended_buf[i];
+        if( !ref ) {
+            return ret;
+        }
+
+        if( ref->size < ret ) {
+            ret = ref->size;
+        }
+    }
+
+    return ret;
 }
 
 

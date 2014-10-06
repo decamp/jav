@@ -44,6 +44,8 @@ public class GenConsts {
 
         p.println( "/* DO NOT MODIFY. This file was generated automatically by " + GenConsts.class.getName() + " */" );
         p.println( "package bits.jav;\n" );
+        p.println( "import java.nio.ByteBuffer;");
+        p.println( "import java.nio.ByteOrder;");
         p.println( "import bits.jav.util.Rational;\n" );
         p.println( "/**" );
         p.println( " * JAV library initialization and constants." );

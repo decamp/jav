@@ -571,6 +571,14 @@ JNIEXPORT jobject JNICALL Java_bits_jav_codec_JavFrame_nJavaBufElem
 
 /*
  * Class:     bits_jav_codec_JavFrame
+ * Method:    nBufElemSize
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nBufElemSize
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
  * Method:    nExtendedBuf
  * Signature: (J)J
  */
@@ -611,6 +619,14 @@ JNIEXPORT jobject JNICALL Java_bits_jav_codec_JavFrame_nJavaExtendedBufElem
 
 /*
  * Class:     bits_jav_codec_JavFrame
+ * Method:    nExtendedBufElemSize
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nExtendedBufElemSize
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
  * Method:    nNbExtendedBuf
  * Signature: (J)I
  */
@@ -624,6 +640,22 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nNbExtendedBuf__J
  */
 JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nNbExtendedBuf__JI
   (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nNbAllBufs
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nNbAllBufs
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nAllBufsMinSize
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nAllBufsMinSize
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     bits_jav_codec_JavFrame

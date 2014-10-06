@@ -60,7 +60,7 @@ public class TestEncodeVideo {
         JavPacket packet = JavPacket.alloc();
         packet.allocData( 1024*1024 );
         
-        ByteBuffer obuf   = ByteBuffer.allocateDirect( 1024 * 1024 );
+        ByteBuffer obuf   = Jav.allocBuffer( 1024 * 1024 );
         int frameCount    = 0;
         int maxFrameCount = 255;
         int[] gotFrame = { 0 };

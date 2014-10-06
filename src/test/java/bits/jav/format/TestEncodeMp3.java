@@ -281,8 +281,7 @@ public class TestEncodeMp3 {
             
             int samps = frame.nbSamples();
             if( buf == null || buf.capacity() < 4 * samps ) {
-                buf = ByteBuffer.allocateDirect( 4 * samps );
-                buf.order( ByteOrder.nativeOrder() );
+                buf = Jav.allocBuffer( 4 * samps );
             }
 
             int len = Math.min( audio[0].length - samplePos, samps );
