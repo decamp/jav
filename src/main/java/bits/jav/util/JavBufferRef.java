@@ -60,18 +60,7 @@ public class JavBufferRef implements NativeObject {
         if( p == 0 ) {
             throw new OutOfMemoryError();
         }
-        return new JavBufferRef( p, null );
-    }
-    
-    /**
-     * Creates a new reference via {@code av_buffer_ref( pointer )}.
-     * The new reference is wrapped and returned as a JavBufferRef instance..
-     *
-     * @param pointer of type AVBufferRef*.
-     * @return JavBufferRef wrapping new reference.
-     */
-    public static JavBufferRef refPointer( long pointer ) {
-        return new JavBufferRef( nRef( pointer ), null );
+        return new JavBufferRef( p );
     }
 
     /**
@@ -95,16 +84,36 @@ public class JavBufferRef implements NativeObject {
         if( p == 0 ) {
             throw new IllegalArgumentException();
         }
-        return new JavBufferRef( p, buf );
+        return new JavBufferRef( p );
+    }
+
+    /**
+     * Creates a new reference via {@code av_buffer_ref( pointer )}.
+     * The new reference is wrapped and returned as a JavBufferRef instance..
+     *
+     * @param pointer of type AVBufferRef*.
+     * @return JavBufferRef wrapping new reference.
+     */
+    public static JavBufferRef refPointer( long pointer ) {
+        return new JavBufferRef( nRef( pointer ) );
+    }
+
+    /**
+     * Wraps an existing AVBufferRef pointer without creating new referenc.
+     *
+     * @param pointer of type AVBufferRef*.
+     * @return JavBufferRef wrapping existing reference.
+     */
+    public static JavBufferRef wrapPointer( long pointer ) {
+        return new JavBufferRef( pointer );
     }
 
 
     private volatile long mPointer;
-    private ByteBuffer mWrappedBuf;
 
-    JavBufferRef( long pointer, ByteBuffer wrappedBuf ) {
+
+    JavBufferRef( long pointer ) {
         mPointer    = pointer;
-        mWrappedBuf = wrappedBuf;
     }
 
     
@@ -139,7 +148,7 @@ public class JavBufferRef implements NativeObject {
             throw new IllegalStateException( "Buffer already released" );
         }
         p = nRef( p );
-        return p == 0L ? null : new JavBufferRef( p, mWrappedBuf );
+        return p == 0L ? null : new JavBufferRef( p );
     }
 
     /**
@@ -153,7 +162,6 @@ public class JavBufferRef implements NativeObject {
         mPointer = 0L;
         if( p != 0L ) {
             nUnref( p );
-            mWrappedBuf = null;
         }
     }
 
@@ -184,11 +192,7 @@ public class JavBufferRef implements NativeObject {
      * @return 0 on success, a negative AVERROR on failure.
      */
     public int makeWritable() {
-        int ret = nMakeWritable( mPointer );
-        if( ret == 0 ) {
-            mWrappedBuf = null;
-        }
-        return ret;
+        return nMakeWritable( mPointer );
     }
 
     /**
@@ -217,22 +221,24 @@ public class JavBufferRef implements NativeObject {
         }
 
         mPointer = 0;
-        mWrappedBuf = null;
-        return new JavBufferRef( ptr, null );
+        return new JavBufferRef( ptr );
     }
 
     /**
      * @return true iff this object is backed by a java-allocated ByteBuffer.
      */
     public boolean hasJavaBuffer() {
-        return mWrappedBuf != null;
+        return nJavaByteBuffer( mPointer ) != null;
     }
 
-
+    /**
+     * @return a safe copy of the ByteBuffer backing this buf, or null if not backed by java ByteBuffer.
+     */
     public ByteBuffer javaBuffer() {
-        ByteBuffer b = mWrappedBuf;
+        ByteBuffer b = nJavaByteBuffer( mPointer );
         return b == null ? null : b.duplicate().order( ByteOrder.nativeOrder() );
     }
+
 
     @Override
     public long pointer() {
@@ -275,5 +281,7 @@ public class JavBufferRef implements NativeObject {
     private static native int nIsWritable( long pointer );
     private static native int nMakeWritable( long pointer );
     private static native int nRealloc( long[] pointer, int size );
+
+    private static native ByteBuffer nJavaByteBuffer( long pointer );
 
 }

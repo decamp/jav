@@ -108,7 +108,7 @@ public class TestJavBufferRef {
         assertEquals( 2, r1.refCount() );
         assertEquals( r0.data(), r1.data() );
         assertTrue( r0.hasJavaBuffer() );
-        assertTrue( !r1.hasJavaBuffer() );
+        assertTrue( r1.hasJavaBuffer() );
         assertTrue( !r0.isWritable() );
 
         r0.unref();
@@ -197,6 +197,23 @@ public class TestJavBufferRef {
         }
 
         assertNull( ref.get() );
+    }
+
+    @Test
+    public void testRetrieveJavaBuf() throws Exception {
+        ByteBuffer a = ByteBuffer.allocateDirect( 1024 );
+        JavBufferRef ref = JavBufferRef.wrap( a, 0 );
+
+        ByteBuffer b = ref.javaBuffer();
+
+        assertNotNull( b );
+        assertEquals( JavMem.nativeAddress( a ), JavMem.nativeAddress( b ) );
+
+        ref.unref();
+
+        ref = JavBufferRef.alloc( 1024, true );
+        b = ref.javaBuffer();
+        assertNull( b );
     }
 
 

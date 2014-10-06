@@ -233,7 +233,7 @@ public final class JavCodecContext implements JavClass {
     }
     
     /**
-     * Decode the audio frame of size packet.size() from packet.dataPointer() into frame.
+     * Decode the audio frame of size packet.size() from packet.dataElem() into frame.
      * <p>
      * Some decoders may support multiple frames in a single AVPacket. Such
      * decoders would then just decode the first frame. In this case,
@@ -288,12 +288,12 @@ public final class JavCodecContext implements JavClass {
      *                  final frame may be smaller than this.frameSize().
      *                  
      * @param out       [out] The user can supply an output nativeBuffer by setting
-     *                  out.dataPointer() and out.size() prior to calling the
+     *                  out.dataElem() and out.size() prior to calling the
      *                  function, but if the size of the user-provided data is not
-     *                  large enough, encoding will fail. If out.dataPointer() and
+     *                  large enough, encoding will fail. If out.dataElem() and
      *                  out.size() are set, out.destruct() must also be set. All
      *                  other AVPacket fields will be reset by the encoder using
-     *                  av_init_packet(). If packet.dataPointer() is NULL, the encoder will
+     *                  av_init_packet(). If packet.dataElem() is NULL, the encoder will
      *                  allocate it. The encoder will set packet.size() to the size
      *                  of the output packet.
      *                  <p>

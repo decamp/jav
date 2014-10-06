@@ -4,26 +4,38 @@
  * http://opensource.org/licenses/BSD-2-Clause
  * This file might include comments and code snippets from FFMPEG, released under LGPL 2.1 or later.
  */
-
 #include "JavBufferRef.h"
-#include "libavutil/buffer.h"
+#include "JavCore.h"
 #include "libavutil/mem.h"
-
-typedef struct
-{
-	JNIEnv* env;
-	jobject ref;
-} JavaRef;
+#include "libavutil/buffer.h"
 
 
-void freeJavaBuf
+void releaseJavaRef
 ( void *opaque, uint8_t *data )
 {
-	JavaRef *ref = (JavaRef*)opaque;
-	JNIEnv *env = ref->env;
-	(*env)->DeleteGlobalRef( env, ref->ref );
-	av_free( ref );
+	jobject ref = (jobject)opaque;
+	JNIEnv *env;
+    (*jav_jvm)->AttachCurrentThread( jav_jvm, (void **)&env, NULL );
+    (*env)->DeleteGlobalRef( env, ref );
 }
+
+
+AVBufferRef *jav_buffer_wrap_bytebuffer
+( JNIEnv *env, jobject buf, jint bufOff, jint bufLen, jint flags )
+{
+	uint8_t *data = (*env)->GetDirectBufferAddress( env, buf ) + bufOff;
+    jobject ref = (*env)->NewGlobalRef( env, buf );
+	return av_buffer_create( data, bufLen, &releaseJavaRef, ref, flags );
+}
+
+
+jobject jav_buffer_unwrap_bytebuffer( AVBufferRef *ref ) {
+    if( !ref || !ref->buffer || ref->buffer->free != &releaseJavaRef ) {
+        return NULL;
+    }
+    return (jobject)ref->buffer->opaque;
+}
+
 
 
 JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nAlloc
@@ -43,16 +55,9 @@ JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nAllocZ
 
 
 JNIEXPORT jlong JNICALL Java_bits_jav_util_JavBufferRef_nWrap
-( JNIEnv *env, jclass clazz, jobject userBuf, jint bufOff, jint bufLen, jint flags )
+( JNIEnv *env, jclass clazz, jobject buf, jint bufOff, jint bufLen, jint flags )
 {
-	uint8_t *data = (*env)->GetDirectBufferAddress( env, userBuf ) + bufOff;
-	JavaRef *ref  = (JavaRef*)av_malloc( sizeof( JavaRef ) );
-	if( ref == NULL ) {
-	    return 0;
-	}
-	ref->env = env;
-	ref->ref = (*env)->NewGlobalRef( env, userBuf );
-	AVBufferRef *ret = av_buffer_create( data, bufLen, &freeJavaBuf, ref, flags );
+    AVBufferRef *ret = jav_buffer_wrap_bytebuffer( env, buf, bufOff, bufLen, flags );
 	return *(jlong*)&ret;
 }
 
@@ -128,4 +133,11 @@ JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nRealloc
 	int err = av_buffer_realloc( (AVBufferRef**)ptr, size );
 	(*env)->ReleaseLongArrayElements( env, jarr, ptr, 0 );
 	return err;
+}
+
+
+JNIEXPORT jobject JNICALL Java_bits_jav_util_JavBufferRef_nJavaByteBuffer
+( JNIEnv *env, jclass clazz, jlong ptr )
+{
+    return jav_buffer_unwrap_bytebuffer( *(AVBufferRef**)&ptr );
 }

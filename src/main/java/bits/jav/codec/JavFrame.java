@@ -48,12 +48,12 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     }
 
     
-    public static JavFrame alloc( ObjectPool<? super JavFrame> pool ) {
+    public static JavFrame alloc( ObjectPool<? super JavFrame> optPool ) {
         long p = nAllocFrame();
         if( p == 0 ) {
             throw new OutOfMemoryError( "Allocation failed." );
         }
-        return new JavFrame( p, pool );
+        return new JavFrame( p, optPool );
     }
     
     
@@ -62,13 +62,19 @@ public class JavFrame extends AbstractRefable implements NativeObject {
                                        int pixFormat,
                                        ObjectPool<? super JavFrame> optPool ) 
     {
+        long pointer = nAllocFrame();
+        if( pointer == 0 ) {
+            throw new OutOfMemoryError();
+        }
+
         int size = nComputeVideoBufferSize( w, h, pixFormat );
         ByteBuffer buf = ByteBuffer.allocateDirect( size );
         buf.order( ByteOrder.nativeOrder() );
+
         return allocVideo( w, h, pixFormat, buf, optPool );
     }
-    
-    
+
+
     public static JavFrame allocVideo( int w,
                                        int h,
                                        int pixFormat,
@@ -95,7 +101,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
                                        int align,
                                        ObjectPool<? super JavFrame> optPool )
     {
-        int size = nComputeAudioBufferSize( channels, samplesPerChannel, sampleFormat, align, null );
+        int size = JavSampleFormat.getBufferSize( channels, samplesPerChannel, sampleFormat, align, null );
         ByteBuffer buf = ByteBuffer.allocateDirect( size );
         buf.order( ByteOrder.nativeOrder() );
         return allocAudio( channels, samplesPerChannel, sampleFormat, align, buf, optPool );
@@ -114,7 +120,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
             throw new OutOfMemoryError();
         }
         JavFrame ret = new JavFrame( pointer, pool );
-        ret.fillAudioFrame( channels, samplesPerChannel, sampleFormat, buf, 0, align );
+        ret.fillAudioFrame( channels, samplesPerChannel, sampleFormat, buf, align );
         return ret;
     }
     
@@ -122,68 +128,33 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     public static int computeVideoBufferSize( int w, int h, int pixFmt ) {
         return nComputeVideoBufferSize( w, h, pixFmt );
     }
-                                        
-    
-    public static int computeAudioBufferSize( int channelNum, 
-                                              int sampleNum, 
-                                              int sampleFmt, 
-                                              int align, 
-                                              int[] optLineSize ) 
-    {
-        return nComputeAudioBufferSize( channelNum, sampleNum, sampleFmt, align, optLineSize );
-    }
-    
 
-    
+
     private long mPointer;
-    //private final ObjectPool<? super JavFrame> mPool;
-    private ByteBuffer mUserBuffer;
-    
+
     
     protected JavFrame( long pointer, ObjectPool<? super JavFrame> pool ) {
         super( pool );
         mPointer = pointer;
-        //mPool    = pool;
     }
-    
-    
-    
-    public void freeData() {
-        mUserBuffer = null;
-        nFreeData( mPointer );
-    }
-    
-    
-    public boolean hasDirectBuffer() {
-        return mUserBuffer != null;
-    }
-    
-    
-    public int directBufferCapacity() {
-        return mUserBuffer == null ? -1 : mUserBuffer.capacity();
-    }
-    
-    
-    public ByteBuffer directBuffer() {
-        if( mUserBuffer == null ) {
-            return null;
-        }
-        ByteBuffer ret = mUserBuffer.duplicate();
-        ret.order( ByteOrder.nativeOrder() );
-        return ret;
-    }
+
 
 
     /**
+     * Unreference all the buffers referenced by frame and reset the frame fields.
+     */
+    public void unrefData() {
+        nUnref( mPointer );
+    }
+
+    /**
+     * Pointer to the picture/channel planes.
      *
-     *
-     * Pointer to the picture/channel planes. <br>
-     * <p>
-     * This might be different from the first allocated byte
+     * <p>This might be different from the first allocated byte
      * - encoding: Set by user
      * - decoding: set by AVCodecContext.get_buffer()
      *
-     * @return A value of type: uint8_t *[AV_NUM_DATA_POINTERS].
+     * @return Pointer of type uint8_t *[AV_NUM_DATA_POINTERS].
      */
     public long data() {
         return nData( mPointer );
@@ -198,8 +169,8 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * @param layer   Layer in data to get. May crash JVM if out-of-bounds.
      * @return A value of type: uint8_t*
      */
-    public long dataPointer( int layer ) {
-        return nDataPointer( mPointer, layer );
+    public long dataElem( int layer ) {
+        return nDataElem( mPointer, layer );
     }
 
     /**
@@ -208,8 +179,8 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * @param layer   Layer in data to set. May crash JVM if out-of-bounds.
      * @param pointer A value of type: uint8_t*
      */
-    public void dataPointer( int layer, long pointer ) {
-        nDataPointer( mPointer, layer, pointer );
+    public void dataElem( int layer, long pointer ) {
+        nDataElem( mPointer, layer, pointer );
     }
 
     /**
@@ -218,8 +189,8 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * @param out Array of length [Jav.AV_NUM_DATA_POINTERS].
      *            Will receive values of type uint8_t*.
      */
-    public void dataPointers( long[] out ) {
-        nDataPointers( mPointer, out );
+    public void dataElem( long[] out ) {
+        nDataElem( mPointer, out );
     }
 
     /**
@@ -236,7 +207,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * but for planar audio with more channels that can fit in data,
      * extended_data must be used in order to access all channels.
      *
-     * @return A value of type: uint8_t**
+     * @return pointer of type uint8_t**
      */
     public long extendedData() {
         return nExtendedData( mPointer );
@@ -245,7 +216,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     /**
      * Sets extendedData pointer.
      *
-     * @param dataPointer  A value of type: uint8_t**
+     * @param dataPointer Pointer of type uint8_t**
      * @see #extendedData()
      */
     public void extendedData( long dataPointer ) {
@@ -266,10 +237,10 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * but for planar audio with more channels that can fit in data,
      * extended_data must be used in order to access all channels.
      *
-     * @return A value of type: uint8_t*
+     * @return pointer of type uint8_t*
      */
-    public long extendedDataPointer( int layer ) {
-        return nExtendedDataPointer( mPointer, layer );
+    public long extendedDataElem( int layer ) {
+        return nExtendedDataElem( mPointer, layer );
     }
 
     /**
@@ -286,8 +257,23 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * but for planar audio with more channels that can fit in data,
      * extended_data must be used in order to access all channels.
      */
-    public void extendedDataPointer( int layer, long planePointer ) {
-        nExtendedDataPointer( mPointer, layer, planePointer );
+    public void extendedDataElem( int layer, long planePointer ) {
+        nExtendedDataElem( mPointer, layer, planePointer );
+    }
+
+    /**
+     * Size, in bytes, of the data for each picture/channel plane.
+     *
+     * For audio, only linesize[0] may be set. For planar audio, each channel
+     * plane must be the same size.
+     *
+     * - encoding: Set by user
+     * - decoding: set by AVCodecContext.get_buffer()
+     *
+     * @return pointer of type int[AV_NUM_DATA_POINTERS]
+     */
+    public long lineSize() {
+        return nLineSize( mPointer );
     }
 
     /**
@@ -633,7 +619,136 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     public long channelLayout() {
         return nChannelLayout( mPointer );
     }
-    
+
+    /**
+     * @return direct pointer to buf field.
+     */
+    public long buf() {
+        return nBuf( mPointer );
+    }
+
+    /**
+     * AVBuffer references backing the data for this frame. If all elements of
+     * this array are NULL, then this frame is not reference counted.
+     *
+     * <p>There may be at most one AVBuffer per data plane, so for video this array
+     * always contains all the references. For planar audio with more than
+     * AV_NUM_DATA_POINTERS channels, there may be more buffers than can fit in
+     * this array. Then the extra AVBufferRef pointers are stored in the
+     * extended_buf array.
+     *
+     * @return new reference to buffer (that SHOULD be released), or {@code null}.
+     */
+    public JavBufferRef bufElem( int idx ) {
+        long n = nBufElem( mPointer, idx );
+        return n == 0L ? null : JavBufferRef.wrapPointer( n );
+    }
+
+    /**
+     * Like {@link #bufElem(int)}, but if the requested buf entry was allocated as
+     * a Java Bytebuffer, that backing buffer will be retrieved directly and a duplicate
+     * will be made. This is slightly more efficient than calling: <br>
+     * {@code
+     *   JavBufferRef ref = bufElem( idx );
+     *   return ref == null ? null : ref.javaBuffer();
+     * }
+     *
+     * @param idx Index into {@code buf} array.
+     * @return backing ByteBuffer object, if exists.
+     * @see #bufElem(int)
+     */
+    public ByteBuffer javaBufElem( int idx ) {
+        return nJavaBufElem( mPointer, idx );
+    }
+
+    /**
+     * @param idx Index into buf array.
+     * @param ref Buffer to insert into array. May be null. Creates new reference if not null.
+     */
+    public void bufElem( int idx, JavBufferRef ref ) {
+        nBufElem( mPointer, idx, ref == null ? 0L : ref.pointer() );
+    }
+
+    /**
+     * @return direct pointer to extended_buf field.
+     */
+    public long extendedBuf() {
+        return nExtendedBuf( mPointer );
+    }
+
+    /**
+     * Sets extendedBuf pointer. Be careful not to cause memory leaks here.
+     *
+     * @param ptr Pointer of type AVBufferRef **.
+     */
+    public void extendedBuf( long ptr ) {
+        nExtendedBuf( mPointer, ptr );
+    }
+
+    /**
+     * For planar audio which requires more than AV_NUM_DATA_POINTERS
+     * AVBufferRef pointers, this array will hold all the references which
+     * cannot fit into AVFrame.buf.
+     *
+     * <p>Note that this is different from AVFrame.extended_data, which always
+     * contains all the pointers. This array only contains the extra pointers,
+     * which cannot fit into AVFrame.buf.
+     *
+     * <p>This array is always allocated using av_malloc() by whoever constructs
+     * the frame. It is freed in av_frame_unref().
+     *
+     * @param idx Index of extended buffer to retrieve.
+     * @return new reference to buffer (that SHOULD be released), or {@code null}.
+     */
+    public JavBufferRef extendedBufElem( int idx ) {
+        long n = nExtendedBufElem( mPointer, idx );
+        return n == 0L ? null : JavBufferRef.wrapPointer( n );
+    }
+
+    /**
+     * Like {@link #extendedBufElem(int)}, but if the requested buf entry was allocated as
+     * a Java Bytebuffer, that backing buffer will be retrieved directly and a duplicate
+     * will be made. This is slightly more efficient than calling: <br>
+     * {@code
+     *   JavBufferRef ref = extendedBufElem( idx );
+     *   return ref == null ? null : ref.javaBuffer();
+     * }
+     *
+     * @param idx Index into {@code extended_buf} array.
+     * @return backing ByteBuffer object, if exists.
+     * @see #bufElem(int)
+     */
+    public ByteBuffer javaExtendedBufElem( int idx ) {
+        return nJavaExtendedBufElem( mPointer, idx );
+    }
+
+    /**
+     * @param idx Index into extended_buf array.
+     * @param ref Buffer to insert into array. May be null. Creates new reference if not null.
+     */
+    public void extendedBufElem( int idx, JavBufferRef ref ) {
+
+        nExtendedBufElem( mPointer, idx, ref == null ? 0L : ref.pointer() );
+    }
+
+    /**
+     * Number of elements in extended_buf.
+     * @see #extendedBuf()
+     */
+    public int nbExtendedBuf() {
+        return nNbExtendedBuf( mPointer );
+    }
+
+    /**
+     * Dangerous.
+     *
+     * Sets value of nb_extended_buf indicating length of extended_buf array.
+     */
+    public void nbExtendedBuf( int num ) {
+        nNbExtendedBuf( mPointer, num );
+    }
+
+
     /**
      * frame timestamp estimated using various heuristics, in stream time base
      * Code outside libavcodec should access this field using:
@@ -709,9 +824,8 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     }
     
     
-    
-    
-    /** Video **/
+
+    //** Video **/
     
     /**
      * Setup the picture fields based on the specified image parameters and image data.
@@ -723,7 +837,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * format <br/>
      * type <br/>
      * lineSizes <br/>
-     * dataPointers <br/>
+     * dataElem <br/>
      * extendedDataPointers <br/>
      * <p>
      * If buf is NULL, the function will fill only the picture linesize
@@ -737,63 +851,25 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * @return the size in bytes required, or a negative error code in case of failure
      */
     public int fillVideoFrame( int width, int height, int pixFmt, ByteBuffer optBuf ) throws JavException {
-        int bytes = nFillVideoFrame( mPointer, width, height, pixFmt, optBuf, optBuf == null ? 0 : optBuf.position() );
+        int bufPos = 0;
+        int bufLen = 0;
+
+        if( optBuf != null ) {
+            optBuf = optBuf.duplicate().order( ByteOrder.nativeOrder() );
+            bufPos = optBuf.position();
+            bufLen = optBuf.remaining();
+        }
+
+        int bytes = nFillVideoFrame( mPointer, width, height, pixFmt, optBuf, bufPos, bufLen );
         if( bytes < 0 ) {
             throw new JavException( "Fill video frame failed: " + bytes );
         }
-        if( optBuf == null ) {
-            mUserBuffer = null;
-        } else {
-            mUserBuffer = optBuf.duplicate().order( ByteOrder.nativeOrder() );
-        }
+
         return bytes;
     }
+
     
-    /**
-     * Setup contents of picture fields manually. This method does not copy the data, but references
-     * the provided data nativeBuffer directly. This method updates the following fields: <br/>
-     * userBuffer <br/>
-     * width <br/>
-     * height <br/>
-     * format <br/>
-     * type <br/>
-     * lineSizes <br/>
-     * dataPointers <br/>
-     * extendedDataPointers <br/>
-     * <p>
-     * I don't believe this method will work for images with depth &gt; 8. 
-     * 
-     * @param w           Width of frame
-     * @param h           Height of frame
-     * @param pixFormat   Format of pixels.
-     * @param depth       Number of components of frame.
-     * @param optBuf      Directly allocated ByteBuffer containing picture data, or NULL.
-     * @param bufOffsets  Array of length &geq; depth holding offsets into buf where data begins for each plane.
-     * @param lineSizes   Array of length &geq; depth holding size of lines for each plane.   
-     * 
-     */
-    public void fillVideoFrameManually( int w, 
-                                        int h,
-                                        int pixFormat,
-                                        int depth,
-                                        ByteBuffer optBuf,
-                                        int[] bufOffsets,
-                                        int[] lineSizes )
-                                        throws JavException 
-    {
-        int err = nFillVideoFrameManually( mPointer, w, h, pixFormat, depth, optBuf, bufOffsets, lineSizes );
-        if( err < 0 ) {
-            throw new RuntimeException( "Unknown exception filling nativeBuffer: " + err );
-        }
-        if( optBuf == null ) {
-            mUserBuffer = null;
-        } else {
-            mUserBuffer = optBuf.duplicate().order( ByteOrder.nativeOrder() );
-        }
-    }
-    
-    
-    /** Audio **/
+    //** Audio **/
 
 
     /**
@@ -809,30 +885,27 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * @param channels           Number of channels.
      * @param samplesPerChannel  Number of samples for each channel.
      * @param sampleFormat       Format of audio samples.
-     * @param buf                Directly allocated ByteBuffer containing audio data.
-     * @param bufOffset          Offset into nativeBuffer where audio data begins.
+     * @param buf                Directly allocated ByteBuffer containing audio data. Position and limit are used.
      * @param align              Byte alignment for plane size. Normally 0.
      */
     public void fillAudioFrame( int channels,
                                 int samplesPerChannel,
                                 int sampleFormat,
                                 ByteBuffer buf,
-                                int bufOffset,
                                 int align )
     {
-        nbSamples( samplesPerChannel );
-        int bytes = nFillAudioFrame( mPointer, 
+        int bytes = nFillAudioFrame( mPointer,
                                      channels,
+                                     samplesPerChannel,
                                      sampleFormat,
                                      align,
                                      buf,
-                                     bufOffset,
-                                     buf.capacity() - bufOffset );
+                                     buf.position(),
+                                     buf.remaining() );
         
         if( bytes < 0 ) {
             throw new RuntimeException( "Unknown exception filling nativeBuffer: " + bytes );
         }
-        mUserBuffer = buf.duplicate().order( ByteOrder.nativeOrder() );
     }
     
     
@@ -863,12 +936,10 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     
     protected void freeObject() {
         long p;
-        
         synchronized( this ) {
             p = mPointer;
             mPointer = 0;
         }
-        
         if( p == 0L ) {
             return;
         }
@@ -878,19 +949,20 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     
     protected static native long nAllocFrame();
     private static native void   nFree( long pointer );
-    private static native void   nFreeData( long pointer );
+    private static native void   nUnref( long pointer );
 
     private static native long nData( long pointer );
-    private static native long nDataPointer( long pointer, int layer );
-    private static native void nDataPointer( long pointer, int layer, long dataPointer );
-    private static native void nDataPointers( long pointer, long[] out8x1 );
+    private static native long nDataElem( long pointer, int layer );
+    private static native void nDataElem( long pointer, int layer, long dataPointer );
+    private static native void nDataElem( long pointer, long[] out8x1 );
+    private static native long nLineSize( long pointer );
     private static native int  nLineSize( long pointer, int layer );
     private static native void nLineSize( long pointer, int layer, int lineSize );
     private static native void nLineSizes( long pointer, int[] out8x1 );
     private static native long nExtendedData( long pointer );
     private static native void nExtendedData( long pointer, long dataPointer );
-    private static native long nExtendedDataPointer( long pointer, int layer );
-    private static native void nExtendedDataPointer( long pointer, int layer, long dataPointer );
+    private static native long nExtendedDataElem( long pointer, int layer );
+    private static native void nExtendedDataElem( long pointer, int layer, long dataPointer );
 
     private static native int  nWidth( long pointer );
     private static native void nWidth( long pointer, int width );
@@ -946,6 +1018,18 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     private static native long nChannelLayout( long pointer );
     private static native void nChannelLayout( long pointer, long channelLayout );
 
+    private static native long nBuf( long pointer );
+    private static native long nBufElem( long pointer, int idx );
+    private static native void nBufElem( long pointer, int idx, long ref );
+    private static native ByteBuffer nJavaBufElem( long pointer, int idx );
+    private static native long nExtendedBuf( long pointer );
+    private static native void nExtendedBuf( long pointer, long bufPointer );
+    private static native long nExtendedBufElem( long pointer, int idx );
+    private static native void nExtendedBufElem( long pointer, int idx, long ref );
+    private static native ByteBuffer nJavaExtendedBufElem( long pointer, int idx );
+    private static native int  nNbExtendedBuf( long pointer );
+    private static native void nNbExtendedBuf( long pointer, int nb );
+
     private static native long nBestEffortTimestamp( long pointer );
     private static native long nPktPos( long pointer );
     private static native long nPktDuration( long pointer );
@@ -958,21 +1042,16 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     private static native int  nChannels( long pointer );
     private static native void nChannels( long pointer, int channels );
 
-    private static native int  nFillVideoFrame( long pointer, int w, int h, int pixFmt, ByteBuffer buf, int off );
-    private static native int  nFillVideoFrameManually( long pointer, int w, int h, int pixFmt, int d, ByteBuffer buf, int[] off, int[] lineSizes );
-    private static native int  nFillAudioFrame( long pointer, int channels, int sampleFmt, int align, ByteBuffer buf, int pos, int remain );
-    
-    /**
-     * Get the required nativeBuffer size for the given audio parameters.
-     *
-     * @param numChannels   the number of channels
-     * @param numSamples    the number of samples in a single channel
-     * @param sampleFmt     the sample format
-     * @param align         nativeBuffer size alignment (0 = default, 1 = no alignment)
-     * @param optLineSize   [out] calculated linesize, may be NULL
-     * @return              required nativeBuffer size, or negative error code on failure
-     */
-    protected static native int nComputeAudioBufferSize( int numChannels, int numSamples, int sampleFmt, int align, int[] optLineSize );
+    private static native int  nFillVideoFrame( long pointer, int w, int h, int pixFmt, ByteBuffer buf, int bufOff, int bufLen );
+    private static native int  nFillAudioFrame( long pointer,
+                                                int channelNum,
+                                                int sampleNum,
+                                                int sampleFmt,
+                                                int align,
+                                                ByteBuffer buf,
+                                                int bufOff,
+                                                int bufLen );
+
     protected static native int nComputeVideoBufferSize( int w, int h, int pixelFormat );
 
 
@@ -1002,4 +1081,155 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     }
 
 
+
+    /**
+     * pointer to the picture/channel planes.
+     * This might be different from the first allocated byte
+     * - encoding: Set by user
+     * - decoding: set by AVCodecContext.get_buffer()
+     *
+     * @param layer   Layer in data to get. May crash JVM if out-of-bounds.
+     * @return A value of type: uint8_t*
+     */
+    public long dataPointer( int layer ) {
+        return nDataElem( mPointer, layer );
+    }
+
+    /**
+     * Sets data pointer for one layer.
+     *
+     * @param layer   Layer in data to set. May crash JVM if out-of-bounds.
+     * @param pointer A value of type: uint8_t*
+     */
+    public void dataPointer( int layer, long pointer ) {
+        nDataElem( mPointer, layer, pointer );
+    }
+
+    /**
+     * Gets max number of data pointers.
+     *
+     * @param out Array of length [Jav.AV_NUM_DATA_POINTERS].
+     *            Will receive values of type uint8_t*.
+     */
+    public void dataPointers( long[] out ) {
+        nDataElem( mPointer, out );
+    }
+
+    /**
+     * Pointers to the data planes/channels.
+     * <p>
+     * For video, this should simply point to data[].
+     * <p>
+     * For planar audio, each channel has a separate data pointer, and
+     * linesize[0] contains the size of each channel nativeBuffer.
+     * For packed audio, there is just one data pointer, and linesize[0]
+     * contains the total size of the nativeBuffer for all channels.
+     * <p>
+     * Note: Both data and extended_data should always be set in a valid frame,
+     * but for planar audio with more channels that can fit in data,
+     * extended_data must be used in order to access all channels.
+     *
+     * @return pointer of type uint8_t*
+     */
+    public long extendedDataPointer( int layer ) {
+        return nExtendedDataElem( mPointer, layer );
+    }
+
+    /**
+     * Pointers to the data planes/channels.
+     *
+     * For video, this should simply point to data[].
+     *
+     * For planar audio, each channel has a separate data pointer, and
+     * linesize[0] contains the size of each channel nativeBuffer.
+     * For packed audio, there is just one data pointer, and linesize[0]
+     * contains the total size of the nativeBuffer for all channels.
+     *
+     * Note: Both data and extended_data should always be set in a valid frame,
+     * but for planar audio with more channels that can fit in data,
+     * extended_data must be used in order to access all channels.
+     */
+    public void extendedDataPointer( int layer, long planePointer ) {
+        nExtendedDataElem( mPointer, layer, planePointer );
+    }
+
+
+    /**
+     * @deprecated Use JavSampleFormat.getBufferSize
+     */
+    @Deprecated public static int computeAudioBufferSize( int channelNum,
+                                                          int sampleNum,
+                                                          int sampleFmt,
+                                                          int align,
+                                                          int[] optLineSize )
+    {
+        return JavSampleFormat.getBufferSize( channelNum, sampleNum, sampleFmt, align, optLineSize );
+    }
+
+
+    @Deprecated public void freeData() {
+        nUnref( mPointer );
+    }
+
+
+    @Deprecated public boolean hasDirectBuffer() {
+        return nJavaBufElem( mPointer, 0 ) != null;
+    }
+
+
+    @Deprecated public int directBufferCapacity() {
+        ByteBuffer b = nJavaBufElem( mPointer, 0 );
+        return b == null ? -1 : b.capacity();
+    }
+
+
+    @Deprecated public ByteBuffer directBuffer() {
+        return javaBufElem( 0 );
+    }
+
+
+    //    /**
+//     * Setup contents of picture fields manually. This method does not copy the data, but references
+//     * the provided data nativeBuffer directly. This method updates the following fields: <br/>
+//     * userBuffer <br/>
+//     * width <br/>
+//     * height <br/>
+//     * format <br/>
+//     * type <br/>
+//     * lineSizes <br/>
+//     * dataElem <br/>
+//     * extendedDataPointers <br/>
+//     * <p>
+//     * I don't believe this method will work for images with depth &gt; 8.
+//     *
+//     * @param w           Width of frame
+//     * @param h           Height of frame
+//     * @param pixFormat   Format of pixels.
+//     * @param depth       Number of components of frame.
+//     * @param optBuf      Directly allocated ByteBuffer containing picture data, or NULL.
+//     * @param bufOffsets  Array of length &geq; depth holding offsets into buf where data begins for each plane.
+//     * @param lineSizes   Array of length &geq; depth holding size of lines for each plane.
+//     *
+//     */
+//    public void fillVideoFrameManually( int w,
+//                                        int h,
+//                                        int pixFormat,
+//                                        int depth,
+//                                        ByteBuffer optBuf,
+//                                        int[] bufOffsets,
+//                                        int[] lineSizes )
+//                                        throws JavException
+//    {
+//        int err = nFillVideoFrameManually( mPointer, w, h, pixFormat, depth, optBuf, bufOffsets, lineSizes );
+//        if( err < 0 ) {
+//            throw new RuntimeException( "Unknown exception filling nativeBuffer: " + err );
+//        }
+//        if( optBuf == null ) {
+//            mUserBuffer = null;
+//        } else {
+//            mUserBuffer = optBuf.duplicate().order( ByteOrder.nativeOrder() );
+//        }
+//    }
+
+    //private static native int  nFillVideoFrameManually( long pointer, int w, int h, int pixFmt, int d, ByteBuffer buf, int[] off, int[] lineSizes );
 }

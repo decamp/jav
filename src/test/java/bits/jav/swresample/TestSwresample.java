@@ -102,7 +102,7 @@ public class TestSwresample {
                 continue;
             }
 
-            //System.out.println( packet.dataPointer() + "\t" + packet.size() );
+            //System.out.println( packet.dataElem() + "\t" + packet.size() );
             format.writeFrame( packet );
             packet.size( 1024*1024 );
             packet.init();
@@ -116,7 +116,7 @@ public class TestSwresample {
                 break;
             }
 
-            //System.out.println( packet.dataPointer() + "\t" + packet.size() );
+            //System.out.println( packet.dataElem() + "\t" + packet.size() );
             format.writeFrame( packet );
             packet.size( 1024*1024 );
             packet.init();
@@ -140,7 +140,7 @@ public class TestSwresample {
 
 
     static float[][] readAudio( int sampleRate, int resampBufSize ) throws Exception {
-        File file = new File( "resources_ext/video.ts" );
+        File file = new File( "../test/resources/test.mp4" );
         JavFormatContext format = JavFormatContext.openInput( file );
         JavStream stream = null;
 

@@ -128,13 +128,14 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nFlush
 }
 
 
-
-
 JNIEXPORT jstring JNICALL Java_bits_jav_codec_JavCodecContext_nCodecName
 (JNIEnv* env, jclass clazz, jlong pointer)
 {
-  AVCodecContext* c  = *(AVCodecContext**)&pointer;
-  return (*env)->NewStringUTF( env, c->codec_name );
+  AVCodecContext* c = *(AVCodecContext**)&pointer;
+  if( !c || !c->codec || !c->codec->name ) {
+    return NULL;
+  }
+  return (*env)->NewStringUTF( env, c->codec->name );
 }
 
 

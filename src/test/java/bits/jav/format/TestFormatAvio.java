@@ -5,11 +5,10 @@
  * This file might include comments and code snippets from FFMPEG, released under LGPL 2.1 or later.
  */
 
-package bits.jav;
+package bits.jav.format;
 
+import bits.jav.Jav;
 import bits.jav.codec.JavPacket;
-import bits.jav.format.JavFormatContext;
-import bits.jav.format.JavIOContext;
 
 import java.io.File;
 

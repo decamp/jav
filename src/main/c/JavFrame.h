@@ -27,10 +27,10 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nFree
 
 /*
  * Class:     bits_jav_codec_JavFrame
- * Method:    nFreeData
+ * Method:    nUnref
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nFreeData
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nUnref
   (JNIEnv *, jclass, jlong);
 
 /*
@@ -43,27 +43,35 @@ JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nData
 
 /*
  * Class:     bits_jav_codec_JavFrame
- * Method:    nDataPointer
+ * Method:    nDataElem
  * Signature: (JI)J
  */
-JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nDataPointer__JI
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nDataElem__JI
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     bits_jav_codec_JavFrame
- * Method:    nDataPointer
+ * Method:    nDataElem
  * Signature: (JIJ)V
  */
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nDataPointer__JIJ
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nDataElem__JIJ
   (JNIEnv *, jclass, jlong, jint, jlong);
 
 /*
  * Class:     bits_jav_codec_JavFrame
- * Method:    nDataPointers
+ * Method:    nDataElem
  * Signature: (J[J)V
  */
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nDataPointers
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nDataElem__J_3J
   (JNIEnv *, jclass, jlong, jlongArray);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nLineSize
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nLineSize__J
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     bits_jav_codec_JavFrame
@@ -107,18 +115,18 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nExtendedData__JJ
 
 /*
  * Class:     bits_jav_codec_JavFrame
- * Method:    nExtendedDataPointer
+ * Method:    nExtendedDataElem
  * Signature: (JI)J
  */
-JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nExtendedDataPointer__JI
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nExtendedDataElem__JI
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     bits_jav_codec_JavFrame
- * Method:    nExtendedDataPointer
+ * Method:    nExtendedDataElem
  * Signature: (JIJ)V
  */
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nExtendedDataPointer__JIJ
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nExtendedDataElem__JIJ
   (JNIEnv *, jclass, jlong, jint, jlong);
 
 /*
@@ -531,6 +539,94 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nChannelLayout__JJ
 
 /*
  * Class:     bits_jav_codec_JavFrame
+ * Method:    nBuf
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nBuf
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nBufElem
+ * Signature: (JI)J
+ */
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nBufElem__JI
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nBufElem
+ * Signature: (JIJ)V
+ */
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nBufElem__JIJ
+  (JNIEnv *, jclass, jlong, jint, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nJavaBufElem
+ * Signature: (JI)Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL Java_bits_jav_codec_JavFrame_nJavaBufElem
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nExtendedBuf
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nExtendedBuf__J
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nExtendedBuf
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nExtendedBuf__JJ
+  (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nExtendedBufElem
+ * Signature: (JI)J
+ */
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nExtendedBufElem__JI
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nExtendedBufElem
+ * Signature: (JIJ)V
+ */
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nExtendedBufElem__JIJ
+  (JNIEnv *, jclass, jlong, jint, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nJavaExtendedBufElem
+ * Signature: (JI)Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL Java_bits_jav_codec_JavFrame_nJavaExtendedBufElem
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nNbExtendedBuf
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nNbExtendedBuf__J
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nNbExtendedBuf
+ * Signature: (JI)V
+ */
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nNbExtendedBuf__JI
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
  * Method:    nBestEffortTimestamp
  * Signature: (J)J
  */
@@ -604,34 +700,18 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nChannels__JI
 /*
  * Class:     bits_jav_codec_JavFrame
  * Method:    nFillVideoFrame
- * Signature: (JIIILjava/nio/ByteBuffer;I)I
- */
-JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nFillVideoFrame
-  (JNIEnv *, jclass, jlong, jint, jint, jint, jobject, jint);
-
-/*
- * Class:     bits_jav_codec_JavFrame
- * Method:    nFillVideoFrameManually
- * Signature: (JIIIILjava/nio/ByteBuffer;[I[I)I
- */
-JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nFillVideoFrameManually
-  (JNIEnv *, jclass, jlong, jint, jint, jint, jint, jobject, jintArray, jintArray);
-
-/*
- * Class:     bits_jav_codec_JavFrame
- * Method:    nFillAudioFrame
  * Signature: (JIIILjava/nio/ByteBuffer;II)I
  */
-JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nFillAudioFrame
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nFillVideoFrame
   (JNIEnv *, jclass, jlong, jint, jint, jint, jobject, jint, jint);
 
 /*
  * Class:     bits_jav_codec_JavFrame
- * Method:    nComputeAudioBufferSize
- * Signature: (IIII[I)I
+ * Method:    nFillAudioFrame
+ * Signature: (JIIIILjava/nio/ByteBuffer;II)I
  */
-JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nComputeAudioBufferSize
-  (JNIEnv *, jclass, jint, jint, jint, jint, jintArray);
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nFillAudioFrame
+  (JNIEnv *, jclass, jlong, jint, jint, jint, jint, jobject, jint, jint);
 
 /*
  * Class:     bits_jav_codec_JavFrame

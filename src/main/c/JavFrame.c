@@ -6,12 +6,13 @@
  */
 
 #include "JavFrame.h"
+#include "JavCore.h"
 #include "libavcodec/avcodec.h"
 
 JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nAllocFrame
 (JNIEnv* env, jclass clazz)
 {
-  AVFrame* f = avcodec_alloc_frame();
+  AVFrame* f = av_frame_alloc();
   return *(jlong*)&f;
 }
 
@@ -38,22 +39,21 @@ JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nData
     return *(jlong*)&arr;
 }
 
-
-JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nDataPointer__JI
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nDataElem__JI
 (JNIEnv* env, jclass clazz, jlong pointer, jint layer)
 {
   return *(jlong*)&((**(AVFrame**)&pointer).data[layer]);
 }
 
 
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nDataPointer__JIJ
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nDataElem__JIJ
 (JNIEnv* env, jclass clazz, jlong pointer, jint layer, jlong dataPointer)
 {
   (**(AVFrame**)&pointer).data[layer] = *(uint8_t**)&dataPointer;
 }
 
 
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nDataPointers
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nDataElem__J_3J
 (JNIEnv* env, jclass clazz, jlong pointer, jlongArray jarr)
 {
   AVFrame* frame = *(AVFrame**)&pointer;
@@ -69,7 +69,6 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nDataPointers
 JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nExtendedData__J
 ( JNIEnv* env, jclass clazz, jlong pointer)
 {
-    AVFrame* frame = *(AVFrame**)&pointer;
     return *(jlong*)&(**(AVFrame**)&pointer).extended_data;
 }
 
@@ -81,17 +80,25 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nExtendedData__JJ
 }
 
 
-JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nExtendedDataPointer__JI
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nExtendedDataElem__JI
 ( JNIEnv *env, jclass clazz, jlong pointer, jint layer )
 {
 	return *(jlong*)&(**(AVFrame**)&pointer).extended_data[layer];
 }
 
 
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nExtendedDataPointer__JIJ
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nExtendedDataElem__JIJ
 ( JNIEnv *env, jclass clazz, jlong pointer, jint layer, jlong dataPointer )
 {
   (**(AVFrame**)&pointer).extended_data[layer] = *(uint8_t**)&dataPointer;
+}
+
+
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nLineSize__J
+( JNIEnv *env, jclass clazz, jlong pointer )
+{
+    int *arr = (**(AVFrame**)&pointer).linesize;
+    return *(jlong*)&arr;
 }
 
 
@@ -119,6 +126,107 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nLineSizes
     vals[i] = frame->linesize[i];
   }
   (*env)->ReleaseIntArrayElements(env, jarr, vals, 0);
+}
+
+
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nBuf
+( JNIEnv *env, jclass clazz, jlong pointer )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    return *(jlong*)&frame->buf;
+}
+
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nBufElem__JI
+( JNIEnv *env, jclass clazz, jlong pointer, jint idx )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    AVBufferRef *ref  = frame->buf[idx];
+    if( ref == NULL ) {
+        return 0;
+    }
+    ref = av_buffer_ref( ref );
+    return *(jlong*)&ref;
+}
+
+
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nBufElem__JIJ
+( JNIEnv *env, jclass clazz, jlong pointer, jint idx, jlong refPtr )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    av_buffer_unref( &frame->buf[idx] );
+    if( refPtr ) {
+        frame->buf[idx] = av_buffer_ref( *(AVBufferRef**)&refPtr );
+    }
+}
+
+
+JNIEXPORT jobject JNICALL Java_bits_jav_codec_JavFrame_nJavaBufElem
+( JNIEnv *env, jclass clazz, jlong pointer, jint idx )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    return jav_buffer_unwrap_bytebuffer( frame->buf[idx] );
+}
+
+
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nExtendedBuf__J
+( JNIEnv *env, jclass clazz, jlong pointer )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    return *(jlong*)&frame->extended_buf;
+}
+
+
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nExtendedBuf__JJ
+( JNIEnv *env, jclass clazz, jlong pointer, jlong extBufPtr )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    frame->extended_buf = *(AVBufferRef***)&extBufPtr;
+}
+
+
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nExtendedBufElem__JI
+( JNIEnv *env, jclass clazz, jlong pointer, jint idx )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    AVBufferRef *ref  = frame->extended_buf[idx];
+    if( ref == NULL ) {
+        return 0;
+    }
+    ref = av_buffer_ref( ref );
+    return *(jlong*)&ref;
+}
+
+
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nExtendedBufElem__JIJ
+( JNIEnv *env, jclass clazz, jlong pointer, jint idx, jlong refPtr )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    av_buffer_unref( &frame->extended_buf[idx] );
+    if( refPtr ) {
+        frame->extended_buf[idx] = av_buffer_ref( *(AVBufferRef**)&refPtr );
+    }
+}
+
+
+JNIEXPORT jobject JNICALL Java_bits_jav_codec_JavFrame_nJavaExtendedBufElem
+( JNIEnv *env, jclass clazz, jlong pointer, jint idx )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    return jav_buffer_unwrap_bytebuffer( frame->buf[idx] );
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nNbExtendedBuf__J
+( JNIEnv *env, jclass clazz, jlong pointer )
+{
+    return (*(AVFrame*)&pointer).nb_extended_buf;
+}
+
+
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nNbExtendedBuf__JI
+( JNIEnv *env, jclass clazz, jlong pointer, jint val )
+{
+    (*(AVFrame*)&pointer).nb_extended_buf = val;
 }
 
 
@@ -208,83 +316,59 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nMetadata__JJ
 
 
 JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nFillVideoFrame
-(JNIEnv *env, jclass clazz, jlong pointer, jint w, jint h, jint pixFmt, jobject jbuf, jint jbufOff )
+(JNIEnv *env, jclass clazz, jlong pointer, jint w, jint h, jint pixFmt, jobject buf, jint bufOff, jint bufLen )
 {
 	AVFrame *pic = *(AVFrame**)&pointer;
+	AVBufferRef *ref = NULL;
+
 	int err;
-	if( jbuf ) {
-		uint8_t *buf = (*env)->GetDirectBufferAddress( env, jbuf ) + jbufOff;		
-		err = avpicture_fill( (AVPicture*)pic, buf, pixFmt, w, h );
+
+	if( buf ) {
+	    ref = jav_buffer_wrap_bytebuffer( env, buf, bufOff, bufLen, 0 );
+		err = avpicture_fill( (AVPicture*)pic, ref->data, pixFmt, w, h );
 	} else {
 		err = avpicture_fill( (AVPicture*)pic, NULL, pixFmt, w, h );
 	}
-	
+
 	if( err >= 0 ) {
+	    pic->buf[0] = ref;
 		pic->width  = w;
 		pic->height = h;
 		pic->format = pixFmt;
-		if( jbuf ) {
-			pic->type = FF_BUFFER_TYPE_USER;
-		}
-	}
-	
-	return err;
-}
-
-
-JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nFillVideoFrameManually
-(JNIEnv *env, jclass clazz, jlong ptr, jint w, jint h, jint pixFmt, jint d, jobject jbuf, jintArray joffs, jintArray jlineSizes)
-{
-	if( d > AV_NUM_DATA_POINTERS ) {
-		return -1;
-	}
-
-	AVFrame *pic = *(AVFrame**)&ptr;
-	jint *lineSizes = (*env)->GetIntArrayElements( env, jlineSizes, 0 );
-	
-	if( jbuf ) {
-		uint8_t *buf = (*env)->GetDirectBufferAddress( env, jbuf );
-		jint* offs   = (*env)->GetIntArrayElements( env, joffs, 0 );
-		
-		int i;
-		for( i = 0; i < d; i++ ) {
-			pic->data[i]     = buf + offs[i];
-			pic->linesize[i] = lineSizes[i];
-		}
-		
-		(*env)->ReleaseIntArrayElements( env, joffs, offs, 0 );
-		pic->type = FF_BUFFER_TYPE_USER;
-		
 	} else {
-		int i;
-		for( i = 0; i < d; i++ ) {
-			pic->linesize[i] = lineSizes[i];
-		}
-	}
-	
-	(*env)->ReleaseIntArrayElements( env, jlineSizes, lineSizes, 0 );
-	pic->width  = w;
-	pic->height = h;
-	pic->format = pixFmt;
-	pic->extended_data = pic->data;
-	
-	return 0;
+	    av_buffer_unref( &ref );
+    }
+
+	return err;
 }
 
 
 #include <stdio.h>
 
 JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nFillAudioFrame
-(JNIEnv* env, jclass clazz, jlong pointer, jint channels, jint sampleFmt, jint align, jobject userBuf, jint pos, jint remain)
+( JNIEnv *env,
+  jclass clazz,
+  jlong pointer,
+  jint chanNum,
+  jint sampNum,
+  jint sampFmt,
+  jint align,
+  jobject buf,
+  jint bufOff,
+  jint bufLen)
 {
-    AVFrame* frame = *(AVFrame**)&pointer;
-    uint8_t* data  = (*env)->GetDirectBufferAddress( env, userBuf );
+    AVFrame* frame   = *(AVFrame**)&pointer;
+    AVBufferRef *ref = jav_buffer_wrap_bytebuffer( env, buf, bufOff, bufLen, 0 );
+    frame->nb_samples = sampNum;
 
-    int err = avcodec_fill_audio_frame( frame, channels, sampleFmt, data + pos, remain, align );
+    int err = avcodec_fill_audio_frame( frame, chanNum, sampFmt, ref->data, ref->size, align );
+
     if( err >= 0 ) {
-        frame->type     = FF_BUFFER_TYPE_USER;
-        frame->channels = channels;
-        frame->format   = sampleFmt;
+        frame->buf[0]   = ref;
+        frame->channels = chanNum;
+        frame->format   = sampFmt;
+    } else {
+        av_buffer_unref( &ref );
     }
 
     return err;
@@ -296,18 +380,3 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nComputeVideoBufferSize
 {
     return avpicture_get_size(pixelFormat, w, h);
 }
-
-
-JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nComputeAudioBufferSize
-(JNIEnv *env, jclass clazz, jint channels, jint samplesPerChannel, jint sampleFmt, jint align, jintArray optLineSize )
-{
-	int lineSize;
-  int ret = av_samples_get_buffer_size( &lineSize, channels, samplesPerChannel, sampleFmt, align );
-	if( optLineSize ) {
-		jint *arr = (*env)->GetIntArrayElements( env, optLineSize, 0 );
-		arr[0] = lineSize;
-		(*env)->ReleaseIntArrayElements( env, optLineSize, arr, 0 );
-	}
-	return ret;
-}
-

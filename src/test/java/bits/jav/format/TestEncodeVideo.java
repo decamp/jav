@@ -5,8 +5,9 @@
  * This file might include comments and code snippets from FFMPEG, released under LGPL 2.1 or later.
  */
 
-package bits.jav;
+package bits.jav.format;
 
+import bits.jav.Jav;
 import bits.jav.codec.*;
 import bits.jav.format.*;
 import bits.jav.swscale.SwsContext;
@@ -47,13 +48,14 @@ public class TestEncodeVideo {
         if( file.exists() ) {
             file.delete();
         }
+        System.out.println( "OUTPUT FILE: " + file.getAbsolutePath() );
         FileChannel out = new FileOutputStream( file ).getChannel();
         
         JavFrame srcFrame = JavFrame.allocVideo( w, h, AV_PIX_FMT_ARGB, null );
         JavFrame dstFrame = JavFrame.allocVideo( w, h, AV_PIX_FMT_YUV420P, null );
         SwsContext sws    = SwsContext.alloc();
-        sws.configure( 640, 480, AV_PIX_FMT_ARGB, 640, 480, AV_PIX_FMT_YUV420P, SWS_POINT );
-        sws.initialize();
+        sws.config( 640, 480, AV_PIX_FMT_ARGB, 640, 480, AV_PIX_FMT_YUV420P, SWS_POINT );
+        sws.init();
         
         JavPacket packet = JavPacket.alloc();
         packet.allocData( 1024*1024 );
@@ -69,7 +71,7 @@ public class TestEncodeVideo {
             if( frameCount < maxFrameCount ) {
                 System.out.println( "Frame: " + frameCount );
                 
-                ByteBuffer buf = srcFrame.directBuffer();
+                ByteBuffer buf = srcFrame.javaBufElem( 0 );
                 buf.clear();
                 buf.order( ByteOrder.BIG_ENDIAN );
                 int v = 0xFF000000 + (( frameCount % 256 ) * 0x00010101 ); 
@@ -78,7 +80,7 @@ public class TestEncodeVideo {
                 }                    
                 buf.flip();
                 
-                sws.convert( srcFrame, 0, h, dstFrame );
+                sws.conv( srcFrame, dstFrame );
                 writeFrame = dstFrame;
                 frameCount++;
             }

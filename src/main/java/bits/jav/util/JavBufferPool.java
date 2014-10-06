@@ -70,7 +70,7 @@ public class JavBufferPool extends AbstractRefable implements NativeObject {
     public synchronized JavBufferRef get() {
         assert mPointer != 0;
         long ptr = nGet( mPointer );
-        return ptr == 0L ? null : new JavBufferRef( ptr, null );
+        return ptr == 0L ? null : new JavBufferRef( ptr );
     }
 
     @Override

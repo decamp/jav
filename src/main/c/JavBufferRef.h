@@ -103,6 +103,14 @@ JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nMakeWritable
 JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nRealloc
   (JNIEnv *, jclass, jlongArray, jint);
 
+/*
+ * Class:     bits_jav_util_JavBufferRef
+ * Method:    nJavaByteBuffer
+ * Signature: (J)Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL Java_bits_jav_util_JavBufferRef_nJavaByteBuffer
+  (JNIEnv *, jclass, jlong);
+
 #ifdef __cplusplus
 }
 #endif

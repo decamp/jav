@@ -5,13 +5,14 @@
  * This file might include comments and code snippets from FFMPEG, released under LGPL 2.1 or later.
  */
 
-package bits.jav;
+package bits.jav.format;
 
 import java.io.*;
 import java.nio.*;
 
+import bits.jav.Jav;
+import bits.jav.JavException;
 import bits.jav.codec.*;
-import bits.jav.format.*;
 import bits.jav.util.*;
 import static bits.jav.Jav.*;
 
@@ -26,7 +27,6 @@ public class TestEncodeMp3 {
         Jav.init();
         testFormatEncode();
     }
-
 
 //    @SuppressWarnings( "resource" )
 //    static void testEncode() throws Exception {
@@ -101,7 +101,7 @@ public class TestEncodeMp3 {
 //            System.out.println( "ww -> " + packet.size() );
 //            b.clear();
 //            b.limit( packet.size() );
-//            JavMem.copy( packet.dataPointer(), b );
+//            JavMem.copy( packet.dataElem(), b );
 //            b.flip();
 //
 //            out.write( b );
@@ -124,7 +124,8 @@ public class TestEncodeMp3 {
         if( outFile.exists() ) {
             outFile.delete();
         }
-        
+        System.out.println( "OUTPUT FILE: " + outFile.getAbsolutePath() );
+
         JavFormatContext format = JavFormatContext.openOutput( outFile, null, null );
         JavOutputFormat ofmt    = format.outputFormat();
         JavCodec codec          = JavCodec.findEncoder( AV_CODEC_ID_MP3 );
@@ -187,7 +188,7 @@ public class TestEncodeMp3 {
                 continue;
             }
             
-            //System.out.println( packet.dataPointer() + "\t" + packet.size() );
+            //System.out.println( packet.dataElem() + "\t" + packet.size() );
             format.writeFrame( packet );
             //packet.size( 1024*1024 );
             //packet.init();
@@ -201,7 +202,7 @@ public class TestEncodeMp3 {
                 break;
             }
             
-            //System.out.println( packet.dataPointer() + "\t" + packet.size() );
+            //System.out.println( packet.dataElem() + "\t" + packet.size() );
             format.writeFrame( packet );
             packet.size( 1024*1024 );
             packet.init();
@@ -215,7 +216,6 @@ public class TestEncodeMp3 {
     
     static float[][] readAudio() throws Exception {
         JavFormatContext format = JavFormatContext.openInput( TEST_VIDEO );
-
         JavStream stream = format.streamOfType( AVMEDIA_TYPE_AUDIO, 0 );
         if(stream == null) {
             System.out.println( "No audio stream found." );
@@ -231,6 +231,7 @@ public class TestEncodeMp3 {
                            cc.channelLayout(),
                            cc.sampleRate(),
                            JavSampleFormat.getName( cc.sampleFormat() ) );
+
         JavFrame frame = JavFrame.alloc();
 
         //Open decodec.
@@ -285,7 +286,6 @@ public class TestEncodeMp3 {
             }
 
             int len = Math.min( audio[0].length - samplePos, samps );
-
             for( int i = 0; i < chans; i++ ) {
                 buf.clear().limit( samps * 4 );
                 JavMem.copy( frame.extendedDataPointer( i ), buf );

@@ -5,11 +5,12 @@
  * This file might include comments and code snippets from FFMPEG, released under LGPL 2.1 or later.
  */
 
-package bits.jav;
+package bits.jav.format;
 
 import java.io.*;
 import java.nio.*;
 
+import bits.jav.Jav;
 import bits.jav.codec.*;
 import bits.jav.format.*;
 import bits.jav.swscale.SwsContext;
@@ -36,10 +37,11 @@ public class TestEncodeFormat {
         if( file.exists() ) {
             file.delete();
         }
-        
+        System.out.println( "OUTPUT FILE: " + file.getAbsolutePath() );
+
         JavFormatContext format = JavFormatContext.openOutput( file, null, null );
-        JavOutputFormat of      = format.outputFormat();
-        JavCodec codec = JavCodec.findEncoder( Jav.AV_CODEC_ID_H264 );
+        JavOutputFormat  of     = format.outputFormat();
+        JavCodec         codec  = JavCodec.findEncoder( Jav.AV_CODEC_ID_H264 );
         
         System.out.println( codec );
         System.out.println( of );
@@ -81,7 +83,7 @@ public class TestEncodeFormat {
         sws.config( 640, 480, AV_PIX_FMT_ARGB,
                     640, 480, AV_PIX_FMT_YUV420P,
                     SWS_POINT );
-        assertNoErr( sws.init() );
+        assertOkay( sws.init() );
         
         JavPacket packet = JavPacket.alloc();
         packet.streamIndex( 0 );

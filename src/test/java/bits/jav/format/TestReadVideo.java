@@ -5,8 +5,9 @@
  * This file might include comments and code snippets from FFMPEG, released under LGPL 2.1 or later.
  */
 
-package bits.jav;
+package bits.jav.format;
 
+import bits.jav.Jav;
 import bits.jav.codec.*;
 import bits.jav.format.*;
 import bits.jav.swscale.SwsContext;
@@ -24,7 +25,7 @@ import static bits.jav.JavException.assertNoErr;
 public class TestReadVideo {
 
 
-    public static final File TEST_VIDEO = new File( "src/test/resources/test.mp4" );
+    public static final File TEST_VIDEO = new File( "../test/resources/test.mp4" );
 
 
     public static void main( String[] args ) throws Exception {

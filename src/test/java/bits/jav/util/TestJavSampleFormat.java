@@ -13,9 +13,6 @@ import static bits.jav.Jav.*;
 import static junit.framework.Assert.*;
 
 
-/**
- * @author Philip DeCamp
- */
 public class TestJavSampleFormat {
 
     public TestJavSampleFormat() {
