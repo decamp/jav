@@ -34,7 +34,7 @@ Pre-compiled native libraries are located in the "lib" folder. They all have ins
   - make
   - Note: third-party libraries must be built before JAV C code.
 
-There is some light code generation going on in "src/gen/java". There are no instructions, but it's things that are mainly ren to pull in constants and simple getters/settings from FFMPEG.
+There is some light code generation going on in "src/gen/java". There are no instructions, but it's things that are mainly run to pull in constants and simple getters/settings from FFMPEG.
 
 ### Runtime:
 After build, add everything (\*.jar, \*.dylib, \*.jnilib) in **lib** and **target** folders to your project. All jnilib/dylib files must be kept in the same directory (or you must update the install paths with, eg, "install_name_tool"), and that directory must be added to your java.library.path runtime property ("java -Djava.library.path=lib_dir")
@@ -59,7 +59,7 @@ lame
 - License: LGPL. See "thirdparty/lame-3.99.5.zip/LICENSE"
 - Web: <http://lame.sourceforge.net/>
 
-bits_langx.jar 
+bits_util.jar 
 - Used for ref counting and object pools.
 - License: Same as this project.
 - Web: <https://github.com/decamp/util>
@@ -69,8 +69,7 @@ bits_langx.jar
 FFMPEG has updated its memory ownership model using the AVBufferRef class. Support for this
 has not been well tested. Be sure to check JavCodecContext.refcountedFrames(),
 and set it to **true** if you want to manage your own frame pool, or set it to **false**
-and **always** make safe copies of decoded frames. I've actually written and tested wrappers
-for the AVBufferRef and AVBufferPool classes, but have not yet incorporated them.
+and **always** make safe copies of decoded frames.
 
 
 ---
