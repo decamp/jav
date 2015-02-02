@@ -24,7 +24,8 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nFree
   av_free( *(AVFrame**)&pointer );
 }
 
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nFreeData
+
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nUnref
 (JNIEnv *env, jclass clazz, jlong pointer)
 {
 	av_frame_unref( *(AVFrame**)&pointer );

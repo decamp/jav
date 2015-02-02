@@ -29,18 +29,6 @@ import bits.util.ref.*;
  */
 public class JavFrame extends AbstractRefable implements NativeObject {
 
-    /*
-     * TODO: Fix reference counting to match original doc:
-     * <p>The data described by an AVFrame is usually reference counted through the
-     * AVBuffer API. The underlying buffer references are stored in AVFrame.buf /
-     * AVFrame.extended_buf. An AVFrame is considered to be reference counted if at
-     * least one reference is set, i.e. if AVFrame.buf[0] != NULL. In such a case,
-     * every single data plane must be contained in one of the buffers in
-     * AVFrame.buf or AVFrame.extended_buf.
-     * There may be a single buffer for all the data, or one separate buffer for
-     * each plane, or anything in between.
-     */
-
     /** Number of data pointers in frame.data[] field. */
     @Deprecated public static final int AV_NUM_DATA_POINTERS = 8;
     
@@ -940,10 +928,8 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     }
 
 
-    /**
-     * Native 
-     */
-    
+    //** Ownership **//
+
     public long pointer() {
         return mPointer;
     }
@@ -952,10 +938,8 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     public ReleaseMethod releaseMethod() {
         return ReleaseMethod.SELF;
     }
-    
-    
-    
-    
+
+
     @Override
     protected void finalize() throws Throwable {
         freeObject();
@@ -974,8 +958,10 @@ public class JavFrame extends AbstractRefable implements NativeObject {
         }
         nFree( p );
     }
-    
-    
+
+
+    //** Native **//
+
     protected static native long nAllocFrame();
     private static native void   nFree( long pointer );
     private static native void   nUnref( long pointer );
@@ -1222,49 +1208,4 @@ public class JavFrame extends AbstractRefable implements NativeObject {
         return javaBufElem( 0 );
     }
 
-
-    //    /**
-//     * Setup contents of picture fields manually. This method does not copy the data, but references
-//     * the provided data nativeBuffer directly. This method updates the following fields: <br/>
-//     * userBuffer <br/>
-//     * width <br/>
-//     * height <br/>
-//     * format <br/>
-//     * type <br/>
-//     * lineSizes <br/>
-//     * dataElem <br/>
-//     * extendedDataPointers <br/>
-//     * <p>
-//     * I don't believe this method will work for images with depth &gt; 8.
-//     *
-//     * @param w           Width of frame
-//     * @param h           Height of frame
-//     * @param pixFormat   Format of pixels.
-//     * @param depth       Number of components of frame.
-//     * @param optBuf      Directly allocated ByteBuffer containing picture data, or NULL.
-//     * @param bufOffsets  Array of length &geq; depth holding offsets into buf where data begins for each plane.
-//     * @param lineSizes   Array of length &geq; depth holding size of lines for each plane.
-//     *
-//     */
-//    public void fillVideoFrameManually( int w,
-//                                        int h,
-//                                        int pixFormat,
-//                                        int depth,
-//                                        ByteBuffer optBuf,
-//                                        int[] bufOffsets,
-//                                        int[] lineSizes )
-//                                        throws JavException
-//    {
-//        int err = nFillVideoFrameManually( mPointer, w, h, pixFormat, depth, optBuf, bufOffsets, lineSizes );
-//        if( err < 0 ) {
-//            throw new RuntimeException( "Unknown exception filling nativeBuffer: " + err );
-//        }
-//        if( optBuf == null ) {
-//            mUserBuffer = null;
-//        } else {
-//            mUserBuffer = optBuf.duplicate().order( ByteOrder.nativeOrder() );
-//        }
-//    }
-
-    //private static native int  nFillVideoFrameManually( long pointer, int w, int h, int pixFmt, int d, ByteBuffer buf, int[] off, int[] lineSizes );
 }
