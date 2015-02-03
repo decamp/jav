@@ -245,7 +245,7 @@ public class JavBufferRef implements NativeObject {
         return mPointer;
     }
 
-
+    @Override
     public ReleaseMethod releaseMethod() {
         return ReleaseMethod.USER;
     }

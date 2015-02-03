@@ -124,7 +124,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     private long mPointer;
 
     
-    protected JavFrame( long pointer, ObjectPool<? super JavFrame> pool ) {
+    public JavFrame( long pointer, ObjectPool<? super JavFrame> pool ) {
         super( pool );
         mPointer = pointer;
     }
@@ -938,7 +938,6 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     public ReleaseMethod releaseMethod() {
         return ReleaseMethod.SELF;
     }
-
 
     @Override
     protected void finalize() throws Throwable {

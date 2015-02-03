@@ -22,10 +22,16 @@ public class GenCWrapperCode {
 //        File inFile  = new File( "src_c/jav/src/JavCodecContext.h" );
 //        File outFile = new File( "src_c/jav/src/JavCodecContextGen.c" );
 //        String ctype = "AVCodecContext";
-        File inFile  = new File( "src_c/jav/src/JavFrame.h" );
-        File outFile = new File( "src_c/jav/src/JavFrameGen.c" );
-        String ctype = "AVFrame";
-        
+
+//        File inFile = new File( "src_c/jav/src/JavFrame.h" );
+//        File outFile = new File( "src_c/jav/src/JavFrameGen.c" );
+//        String ctype = "AVFrame";
+
+        //genGettersSetters( inFile, outFile, ctype );
+    }
+
+
+    public static void genGettersSetters( File inFile, File outFile, String ctype ) throws Exception {
         Pattern DEC_PAT = Pattern.compile( "JNIEXPORT (\\w++) JNICALL (\\w+_n([\\w+^_]+)__(J\\w?))\\s*+$" );
         Pattern ARG_PAT = Pattern.compile( "\\w++" );
         
@@ -54,11 +60,10 @@ public class GenCWrapperCode {
             
             //System.out.println( retType + " " + funcName + "  " + parseVarName( varName ) + " " + sig ); 
             k = in.readLine();
-            
             String argType = null;
             
             if( sig.length() == 1 ) {
-                if( !supportedType( retType ) ) {
+                if( !supportedGetterType( retType ) ) {
                     continue;
                 }
             } else if( sig.length() == 2 ) {
@@ -71,7 +76,7 @@ public class GenCWrapperCode {
                 m2.find();
                 m2.find();
                 argType = m2.group( 0 ).intern();
-                if( !supportedType( argType ) ) {
+                if( !supportedSetterType( argType ) ) {
                     continue;
                 }
             }
@@ -86,7 +91,16 @@ public class GenCWrapperCode {
             out.println( " )\n{" );
             
             if( argType == null ) {
-                out.format( "  return (%s)(**(%s**)&pointer).%s;\n", retType, ctype, varName );
+                if( "jstring".equals( retType ) ) {
+                    out.format( "  %s* self = *(%s**)&pointer;\n", ctype, ctype );
+                    out.format( "  if( self->%s ) {\n", varName );
+                    out.format( "    return (*env)->NewStringUTF( env, self->%s );\n", varName );
+                    out.format( "  } else {\n" );
+                    out.format( "    return NULL;\n" );
+                    out.format( "  }\n" );
+                } else {
+                    out.format( "  return (%s)(**(%s**)&pointer).%s;\n", retType, ctype, varName );
+                }
             } else {
                 out.format( "  (**(%s**)&pointer).%s = val; \n", ctype, varName );
             }
@@ -117,8 +131,13 @@ public class GenCWrapperCode {
         return s.toString();
     }
 
-    
-    static boolean supportedType( String t ) {
+
+    static boolean supportedGetterType( String t ) {
+        return supportedSetterType( t ) || "jstring".equals( t );
+    }
+
+
+    static boolean supportedSetterType( String t ) {
         t = t.intern();
         return t == "jint" ||
                t == "jlong" ||

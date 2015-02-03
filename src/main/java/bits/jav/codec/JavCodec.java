@@ -30,7 +30,7 @@ public class JavCodec implements NativeObject {
     
     
     private long mPointer;
-    
+
     
     JavCodec( long pointer ) {
         mPointer = pointer;

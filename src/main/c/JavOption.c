@@ -186,9 +186,9 @@ JNIEXPORT jint JNICALL Java_bits_jav_util_JavOption_nSetOptionRational
   AVClass* object   = *(AVClass**)&objectPointer;
   const char* cname = (*env)->GetStringUTFChars(env, name, NULL);
   AVRational value;
-	value.num = num;
-	value.den = den;
-  int err           = av_opt_set_q(object, cname, value, searchFlags);
+  value.num = num;
+  value.den = den;
+  int err = av_opt_set_q(object, cname, value, searchFlags);
   
   (*env)->ReleaseStringUTFChars(env, name, cname);
   return err;

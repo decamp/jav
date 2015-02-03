@@ -361,7 +361,6 @@ public class SwrContext implements JavClass {
         return ReleaseMethod.SELF;
     }
 
-
     @Override
     protected void finalize() throws Throwable {
         release();

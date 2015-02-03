@@ -203,12 +203,17 @@ public final class Rational {
     /**
      * Don't use this unless you're dealing with the native code that returns
      * a correctly constructed Rational.
-     *
-     * @param val
-     * @return
      */
     public static Rational fromNativeLong( long val ) {
         return new Rational( (int)(val >>> 32), (int)val );
+    }
+
+    /**
+     * Don't use this unless you're dealing with the native code that returns
+     * a correctly constructed Rational.
+     */
+    public static long toNativeLong( Rational rat ) {
+        return rat == null ? 0L : ((long)rat.mNum << 32L ) | (rat.mDen & 0xFFFFFFFFL );
     }
 
 
@@ -261,7 +266,6 @@ public final class Rational {
     public int hashCode() {
         return mNum ^ mDen;
     }
-
 
     @Deprecated public double asDouble() {
         return (double)mNum / mDen;

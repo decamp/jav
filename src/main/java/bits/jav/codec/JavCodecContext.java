@@ -135,7 +135,7 @@ public final class JavCodecContext implements JavClass {
     public void release() {
         long p = mPointer;
         mPointer = 0;
-        if( mRelease == ReleaseMethod.SELF ) {
+        if( mRelease != ReleaseMethod.OWNER ) {
             nFree( p );
         }
     }
@@ -687,7 +687,8 @@ public final class JavCodecContext implements JavClass {
     public int refcountedFrames() {
         return nRefcountedFrames( mPointer );
     }
-    
+
+
     public void refcountedFrames( int n ) {
         nRefcountedFrames( mPointer, n );
     }

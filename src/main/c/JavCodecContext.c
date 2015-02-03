@@ -32,7 +32,7 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavCodecContext_nOpen
 		//char str[64];
 		//av_strerror( err, str, 64 );
 		//printf( "CODEC FAILED : 0x%08X  %s\n", err, str );
-    //return 0x03000002; //ERROR_CODEC_OPEN_FAILED;
+        //return 0x03000002; //ERROR_CODEC_OPEN_FAILED;
 		return err;
 	}
    
