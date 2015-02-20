@@ -119,14 +119,6 @@ public final class JavMem {
     public static native long reallocArray( long ptr, long nmemb, long size );
 
     /**
-     * Duplicate the string s.
-     * @param ptr Pointer to c-string to be duplicated.
-     * @return Pointer to a newly-allocated string containing a
-     * copy of *ptr, or 0 if the string cannot be allocated.
-     */
-    public static native long strdup( long ptr );
-
-    /**
      * Duplicate the nativeBuffer p.
      *
      * @param ptr   Buffer to be duplicated
@@ -135,6 +127,15 @@ public final class JavMem {
      *         copy of *ptr, or 0 if the nativeBuffer cannot be allocated.
      */
     public static native long memdup( long ptr, long size );
+
+    /**
+     * Duplicate a string.
+     *
+     * @param ptr Pointer to c-string to be duplicated.
+     * @return Pointer to a newly-allocated string containing a
+     *         copy of *ptr, or 0 if the string cannot be allocated.
+     */
+    public static native long strdup( long ptr );
 
     /**
      * Free a memory block which has been allocated with av_malloc(z)() or
@@ -198,6 +199,11 @@ public final class JavMem {
      * @throws IllegalArgumentException
      */
     public static native void copyReverse( long srcPointer, long dstPointer, int chunkNum, int chunkSize );
+
+    /**
+     * Fills the first {@code size} bytes of a memory area with constant byte {@code val}.
+     */
+    public static native void memset( long ptr, int val, int size );
 
     /**
      * @param src Directly allocated ByteBuffer.

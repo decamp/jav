@@ -132,6 +132,14 @@ JNIEXPORT void JNICALL Java_bits_jav_util_JavMem_copyReverse
 }
 
 
+JNIEXPORT void JNICALL Java_bits_jav_util_JavMem_memset
+( JNIEnv *env, jclass clazz, jlong ptr, jint val, jint size )
+{
+    memset( *(void**)&ptr, val, size );
+}
+
+
+
 JNIEXPORT jlong JNICALL Java_bits_jav_util_JavMem_nativeAddress
 ( JNIEnv *env, jclass clazz, jobject buf )
 {

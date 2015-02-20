@@ -49,19 +49,19 @@ JNIEXPORT jlong JNICALL Java_bits_jav_util_JavMem_reallocArray
 
 /*
  * Class:     bits_jav_util_JavMem
- * Method:    strdup
- * Signature: (J)J
- */
-JNIEXPORT jlong JNICALL Java_bits_jav_util_JavMem_strdup
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     bits_jav_util_JavMem
  * Method:    memdup
  * Signature: (JJ)J
  */
 JNIEXPORT jlong JNICALL Java_bits_jav_util_JavMem_memdup
   (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     bits_jav_util_JavMem
+ * Method:    strdup
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_bits_jav_util_JavMem_strdup
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     bits_jav_util_JavMem
@@ -86,6 +86,14 @@ JNIEXPORT void JNICALL Java_bits_jav_util_JavMem_copy
  */
 JNIEXPORT void JNICALL Java_bits_jav_util_JavMem_copyReverse
   (JNIEnv *, jclass, jlong, jlong, jint, jint);
+
+/*
+ * Class:     bits_jav_util_JavMem
+ * Method:    memset
+ * Signature: (JII)V
+ */
+JNIEXPORT void JNICALL Java_bits_jav_util_JavMem_memset
+  (JNIEnv *, jclass, jlong, jint, jint);
 
 /*
  * Class:     bits_jav_util_JavMem
