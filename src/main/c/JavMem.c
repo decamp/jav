@@ -83,6 +83,55 @@ JNIEXPORT void JNICALL Java_bits_jav_util_JavMem_copy
 }
 
 
+JNIEXPORT void JNICALL Java_bits_jav_util_JavMem_copyReverse
+( JNIEnv *env, jclass clazz, jlong srcPtr, jlong dstPtr, jint chunkNum, jint chunkSize )
+{
+    switch( chunkSize ) {
+    case 1: {
+        const uint8_t* src = *(const uint8_t**)&srcPtr;
+        uint8_t* dst = *(uint8_t**)&dstPtr + chunkNum;
+        for( int i = 0; i < chunkNum; i++ ) {
+            *--dst = *src++;
+        }
+        break;
+    }
+    case 2: {
+        const uint16_t* src = *(const uint16_t**)&srcPtr;
+        uint16_t* dst = *(uint16_t**)&dstPtr + chunkNum;
+        for( int i = 0; i < chunkNum; i++ ) {
+            *--dst = *src++;
+        }
+        break;
+    }
+    case 4: {
+        const uint32_t* src = *(const uint32_t**)&srcPtr;
+        uint32_t* dst = *(uint32_t**)&dstPtr + chunkNum;
+        for( int i = 0; i < chunkNum; i++ ) {
+            *--dst = *src++;
+        }
+        break;
+    }
+    case 8: {
+        const uint64_t* src = *(const uint64_t**)&srcPtr;
+        uint64_t* dst = *(uint64_t**)&dstPtr + chunkNum;
+        for( int i = 0; i < chunkNum; i++ ) {
+            *--dst = *src++;
+        }
+        break;
+    }
+    default: {
+        const void* src = *(const void**)&srcPtr;
+        void* dst = *(void**)&dstPtr + chunkNum * chunkSize;
+        for( int i = 0; i < chunkNum; i++ ) {
+            dst -= chunkSize;
+            memcpy( dst, src, chunkSize );
+            src += chunkSize;
+        }
+        break;
+    }}
+}
+
+
 JNIEXPORT jlong JNICALL Java_bits_jav_util_JavMem_nativeAddress
 ( JNIEnv *env, jclass clazz, jobject buf )
 {

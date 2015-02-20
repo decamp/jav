@@ -182,11 +182,22 @@ public final class JavMem {
      * <p>
      * This is an excellent method to call to crash the JVM. Use responsibly.
      *
-     * @param srcPointer  Native memory address where data will be read from.
-     * @param dstPointer  Native memory address where data will be written to.
+     * @param srcPointer  Native memory address where data will be read.
+     * @param dstPointer  Native memory address where data will be written.
      * @param len         Number of bytes to copy.
      */
     public static native void copy( long srcPointer, long dstPointer, long len );
+
+    /**
+     * Copies a block of memory from one pointer to another in reverse order.
+     *
+     * @param srcPointer  Native memory address where data will be read.
+     * @param dstPointer  Native memory address where data will be written.
+     * @param chunkNum    Number of chunks to copy
+     * @param chunkSize   Size of each chunk in bytes.
+     * @throws IllegalArgumentException
+     */
+    public static native void copyReverse( long srcPointer, long dstPointer, int chunkNum, int chunkSize );
 
     /**
      * @param src Directly allocated ByteBuffer.

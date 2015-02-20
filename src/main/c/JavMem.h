@@ -81,6 +81,14 @@ JNIEXPORT void JNICALL Java_bits_jav_util_JavMem_copy
 
 /*
  * Class:     bits_jav_util_JavMem
+ * Method:    copyReverse
+ * Signature: (JJII)V
+ */
+JNIEXPORT void JNICALL Java_bits_jav_util_JavMem_copyReverse
+  (JNIEnv *, jclass, jlong, jlong, jint, jint);
+
+/*
+ * Class:     bits_jav_util_JavMem
  * Method:    nativeAddress
  * Signature: (Ljava/nio/ByteBuffer;)J
  */
