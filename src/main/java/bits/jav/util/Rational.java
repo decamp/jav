@@ -15,7 +15,7 @@ public final class Rational {
     public static final int AV_ROUND_DOWN        = 2; ///< Round toward -infinity.
     public static final int AV_ROUND_UP          = 3; ///< Round toward +infinity.
     public static final int AV_ROUND_NEAR_INF    = 5; ///< Round to nearest and halfway cases away from zero.
-    public static final int AV_ROUND_PASS_MINMAX = 8192; ///< Flag to pass INT64_MIN/MAX through instead of rescaling, this avoids special cases for AV_NOPTS_VALUE
+    public static final int AV_ROUND_PASS_MINMAX = 8192; ///< Flag to pass Long.MIN_VALUE / Long.MAX_VALUE through without scaling.
 
     /**
      * Reduces the fraction {@code num / den } to a <i>canonical</i> reduced representation, {@code out}, where:

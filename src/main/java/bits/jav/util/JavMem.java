@@ -8,8 +8,6 @@
 package bits.jav.util;
 
 
-import bits.jav.Jav;
-
 import java.nio.ByteBuffer;
 
 

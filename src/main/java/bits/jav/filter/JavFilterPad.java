@@ -43,7 +43,7 @@
 //    }
 //
 //    /**
-//     * AVFilterPad type.
+//     * AVFilterPad type (audio, video, etc), from Jav.AVMEDIA_*
 //     */
 //    public int type() {
 //        return nType( mPointer );
