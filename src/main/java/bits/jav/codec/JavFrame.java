@@ -650,7 +650,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      */
     public ByteBuffer javaBufElem( int idx ) {
         ByteBuffer ret = nJavaBufElem( mPointer, idx );
-        return ret == null ? null : ret.duplicate();
+        return ret == null ? null : ret.duplicate().order( ret.order() );
     }
 
     /**
@@ -719,7 +719,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      */
     public ByteBuffer javaExtendedBufElem( int idx ) {
         ByteBuffer ret = nJavaExtendedBufElem( mPointer, idx );
-        return ret == null ? null : ret.duplicate();
+        return ret == null ? null : ret.duplicate().order( ret.order() );
     }
 
     /**
@@ -876,7 +876,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
         int bufLen = 0;
 
         if( optBuf != null ) {
-            optBuf = optBuf.duplicate().order( ByteOrder.nativeOrder() );
+            optBuf = optBuf.duplicate().order( optBuf.order() );
             bufPos = optBuf.position();
             bufLen = optBuf.remaining();
         }
