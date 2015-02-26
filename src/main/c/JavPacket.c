@@ -26,7 +26,6 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nInit
 }
 
 
-
 JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nFree
 (JNIEnv* env, jclass clazz, jlong pointer)
 {
@@ -61,6 +60,37 @@ JNIEXPORT int JNICALL Java_bits_jav_codec_JavPacket_nAllocData
 }
 
 
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavPacket_nBuf__J
+( JNIEnv *env, jclass clazz, jlong pointer )
+{
+    AVBufferRef *ref = (*(AVPacket**)&pointer)->buf;
+    if( ref == NULL ) {
+        return 0;
+    }
+    ref = av_buffer_ref( ref );
+    return *(jlong*)&ref;
+}
+
+
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nBuf__JJ
+( JNIEnv *env, jclass clazz, jlong pointer, jlong bufPointer )
+{
+  AVPacket *packet = *(AVPacket**)&pointer;
+  av_buffer_unref( &packet->buf );
+  if( bufPointer ) {
+    packet->buf = av_buffer_ref( *(AVBufferRef**)&bufPointer );
+  }
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavPacket_nBufSize
+(JNIEnv *env, jclass clazz, jlong pointer)
+{
+  AVBufferRef *ref = (*(AVPacket**)&pointer)->buf;
+  return ref ? ref->size : 0;
+}
+
+
 JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavPacket_nData__J
 (JNIEnv* env, jclass clazz, jlong pointer)
 {
@@ -92,9 +122,22 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nSize__JI
 JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nMoveData
 (JNIEnv *env, jclass clazz, jlong pointer, jint n)
 {
-	AVPacket* p = *(AVPacket**)&pointer;
+	AVPacket *p = *(AVPacket**)&pointer;
 	p->data += n;
 	p->size -= n;
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavPacket_nResetData
+(JNIEnv *env, jclass clazz, jlong pointer)
+{
+  AVPacket *p = *(AVPacket**)&pointer;
+  if( p->buf ) {
+    p->data = p->buf->data;
+    p->size = p->buf->size;
+    return p->size;
+  }
+  return p->size;
 }
 
 
@@ -194,18 +237,4 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nConvergenceDuration__JJ
 {
     (**(AVPacket**)&pointer).convergence_duration = cd;
 }
-
-
-JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavPacket_nBuf__J
-( JNIEnv *env, jclass clazz, jlong pointer )
-{
-	return (jlong)(**(AVPacket**)&pointer).buf;
-}
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nBuf__JJ
-(JNIEnv *env, jclass clazz, jlong pointer, jlong bufPointer)
-{
-	(**(AVPacket**)&pointer).buf = *(AVBufferRef**)&bufPointer;
-}
-
 

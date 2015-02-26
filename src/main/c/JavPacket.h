@@ -49,6 +49,30 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavPacket_nAllocData
 
 /*
  * Class:     bits_jav_codec_JavPacket
+ * Method:    nBuf
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavPacket_nBuf__J
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavPacket
+ * Method:    nBuf
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nBuf__JJ
+  (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavPacket
+ * Method:    nBufSize
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavPacket_nBufSize
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavPacket
  * Method:    nData
  * Signature: (J)J
  */
@@ -70,6 +94,14 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nData__JJ
  */
 JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nMoveData
   (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     bits_jav_codec_JavPacket
+ * Method:    nResetData
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavPacket_nResetData
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     bits_jav_codec_JavPacket
@@ -197,22 +229,6 @@ JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavPacket_nConvergenceDuration__J
  * Signature: (JJ)V
  */
 JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nConvergenceDuration__JJ
-  (JNIEnv *, jclass, jlong, jlong);
-
-/*
- * Class:     bits_jav_codec_JavPacket
- * Method:    nBuf
- * Signature: (J)J
- */
-JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavPacket_nBuf__J
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     bits_jav_codec_JavPacket
- * Method:    nBuf
- * Signature: (JJ)V
- */
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nBuf__JJ
   (JNIEnv *, jclass, jlong, jlong);
 
 #ifdef __cplusplus

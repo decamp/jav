@@ -21,12 +21,12 @@ import bits.jav.util.*;
  */
 public final class JavCodecContext implements JavClass {
 
-    // TODO: This should probably be hidden.
-    public static final int FF_CODER_TYPE_VLC      = 0;
-    public static final int FF_CODER_TYPE_AC       = 1;
-    public static final int FF_CODER_TYPE_RAW      = 2;
-    public static final int FF_CODER_TYPE_RLE      = 3;
-    public static final int FF_CODER_TYPE_DEFLATE  = 4;
+//    // TODO: This should probably be hidden.
+//    public static final int FF_CODER_TYPE_VLC      = 0;
+//    public static final int FF_CODER_TYPE_AC       = 1;
+//    public static final int FF_CODER_TYPE_RAW      = 2;
+//    public static final int FF_CODER_TYPE_RLE      = 3;
+//    public static final int FF_CODER_TYPE_DEFLATE  = 4;
 
 
     /**

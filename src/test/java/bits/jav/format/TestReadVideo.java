@@ -8,8 +8,8 @@
 package bits.jav.format;
 
 import bits.jav.Jav;
+import bits.jav.JavException;
 import bits.jav.codec.*;
-import bits.jav.format.*;
 import bits.jav.swscale.SwsContext;
 import bits.jav.util.*;
 import bits.util.gui.ImagePanel;
@@ -19,7 +19,6 @@ import java.io.*;
 import java.nio.*;
 
 import static bits.jav.Jav.*;
-import static bits.jav.JavException.assertNoErr;
 
 
 public class TestReadVideo {
@@ -29,8 +28,9 @@ public class TestReadVideo {
 
 
     public static void main( String[] args ) throws Exception {
-        testReadVideo();
+        testReadVideo2();
     }
+
 
     static void testReadVideo() throws Exception {
         Jav.init();
@@ -122,7 +122,7 @@ public class TestReadVideo {
             System.out.println( "Decoded frame" );
             assertNoErr( sws.conv( frame, 0, srch, outFrame ) );
 
-            IntBuffer ib = outFrame.directBuffer().asIntBuffer();
+            IntBuffer ib = outFrame.javaBufElem( 0 ).asIntBuffer();
             ib.get( dispPix );
             dispIm.setRGB( 0, 0, dstw, dsth, dispPix, 0, dstw );
             panel.repaint();
@@ -138,6 +138,103 @@ public class TestReadVideo {
             try {
                 Thread.sleep( 50L );
             } catch( InterruptedException ex ) {}
+        }
+    }
+
+
+    static void testReadVideo2() throws Exception {
+        Jav.init();
+        File file = TEST_VIDEO;
+
+        JavFormatContext format = JavFormatContext.openInput( file );
+        JavStream stream        = format.stream(0);
+        JavCodecContext cc      = stream.codecContext();
+        JavCodec codec          = JavCodec.findDecoder( cc.codecId() );
+
+        System.out.println( " Got codec: " );
+        System.out.println( codec );
+        System.out.println( cc.codecId() );
+        System.out.println( codec.pointer() + "\t" + cc.pointer() );
+
+        cc.open( codec );
+
+        JavPacket packet = JavPacket.alloc();
+        JavFrame frame   = JavFrame.alloc();
+        Rational aspect  = cc.sampleAspectRatio();
+
+        int srcw = cc.width();
+        int srch = cc.height();
+        int srcf = cc.pixelFormat();
+        int dstw = srcw * aspect.num() / aspect.den();
+        int dsth = srch;
+        int dstf = AV_PIX_FMT_BGRA;
+
+        SwsContext sws = SwsContext.alloc();
+        assertNoErr( sws.config( srcw, srch, srcf, dstw, dsth, dstf, SWS_FAST_BILINEAR ) );
+        assertNoErr( sws.init() );
+
+        JavFrame outFrame = JavFrame.allocVideo( dstw, dsth, dstf, null );
+        int count = 0;
+        long startMillis = System.currentTimeMillis();
+        boolean endOfInput  = false;
+        boolean decodeReady = false;
+        int[] gotFrame = { 0 };
+        int packetShift = 0;
+
+
+        while( true ) {
+            if( !decodeReady ) {
+                if( packetShift != 0 ) {
+                    packet.moveDataPointer( -packetShift );
+                    packetShift = 0;
+                }
+
+                if( format.readPacket( packet ) != 0 ) {
+                    endOfInput  = true;
+                    decodeReady = true;
+                    packet.freeData();
+                    continue;
+                }
+                if( packet.streamIndex() != stream.index() ) {
+                    continue;
+                }
+                System.out.println( "Read packet: " + packet.pointer() + "\t" + packet.dataPointer() );
+                decodeReady = true;
+            }
+
+            int size = packet.size();
+            int err  = cc.decodeVideo( packet, frame, gotFrame );
+            if( err < 0 ) {
+                throw new IOException( "Decode failed." );
+            }
+
+            if( err < size ) {
+                //packet.moveDataPointer( err );
+                //packetShift += err;
+            } else if( !endOfInput ) {
+                decodeReady = false;
+            }
+            if( gotFrame[0] == 0 ) {
+                continue;
+            }
+
+            System.out.println( "Decoded frame" );
+            assertNoErr( sws.conv( frame, 0, srch, outFrame ) );
+
+            try {
+                Thread.sleep( 50L );
+            } catch( InterruptedException ex ) {}
+        }
+    }
+
+
+    public static void assertNoErr( int err ) throws JavException {
+        if( err >= 0 ) {
+            return;
+        }
+        JavException ex = JavException.fromErr( err );
+        if( ex != null ) {
+            throw ex;
         }
     }
 

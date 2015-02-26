@@ -636,6 +636,14 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     }
 
     /**
+     * @param idx Index into buf array.
+     * @param ref Buffer to insert into array. May be null. Creates new reference if not null.
+     */
+    public void bufElem( int idx, JavBufferRef ref ) {
+        nBufElem( mPointer, idx, ref == null ? 0L : ref.pointer() );
+    }
+
+    /**
      * Like {@link #bufElem(int)}, but if the requested buf entry was allocated as
      * a Java Bytebuffer, that backing buffer will be retrieved directly and a duplicate
      * will be made. This is slightly more efficient than calling: <br>
@@ -653,13 +661,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
         return ret == null ? null : ret.duplicate().order( ret.order() );
     }
 
-    /**
-     * @param idx Index into buf array.
-     * @param ref Buffer to insert into array. May be null. Creates new reference if not null.
-     */
-    public void bufElem( int idx, JavBufferRef ref ) {
-        nBufElem( mPointer, idx, ref == null ? 0L : ref.pointer() );
-    }
+
 
     /**
      * @return Useable size of data buffer (size - padding)

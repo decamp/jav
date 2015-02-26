@@ -39,7 +39,6 @@ public class TestJavBufferPool {
 
         pool.deref();
         b.unref();
-
         assertTrue( set.size() < 128 );
     }
 

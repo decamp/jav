@@ -7,16 +7,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#undef bits_jav_codec_JavCodecContext_FF_CODER_TYPE_VLC
-#define bits_jav_codec_JavCodecContext_FF_CODER_TYPE_VLC 0L
-#undef bits_jav_codec_JavCodecContext_FF_CODER_TYPE_AC
-#define bits_jav_codec_JavCodecContext_FF_CODER_TYPE_AC 1L
-#undef bits_jav_codec_JavCodecContext_FF_CODER_TYPE_RAW
-#define bits_jav_codec_JavCodecContext_FF_CODER_TYPE_RAW 2L
-#undef bits_jav_codec_JavCodecContext_FF_CODER_TYPE_RLE
-#define bits_jav_codec_JavCodecContext_FF_CODER_TYPE_RLE 3L
-#undef bits_jav_codec_JavCodecContext_FF_CODER_TYPE_DEFLATE
-#define bits_jav_codec_JavCodecContext_FF_CODER_TYPE_DEFLATE 4L
 #undef bits_jav_codec_JavCodecContext_FF_COMPRESSION_DEFAULT
 #define bits_jav_codec_JavCodecContext_FF_COMPRESSION_DEFAULT -1L
 /*

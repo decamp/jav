@@ -7,6 +7,7 @@
 
 package bits.jav.codec;
 
+import bits.jav.JavException;
 import bits.jav.util.*;
 import bits.util.ref.*;
 
@@ -58,11 +59,20 @@ public final class JavPacket extends AbstractRefable implements NativeObject {
         super( pool );
         mPointer = pointer;
     }
-    
-    
-    
-    public void allocData( int size ) {
-        nAllocData( mPointer, size );
+
+
+
+    /**
+     * Allocate the payload of a packet and initialize its fields with
+     * default values.
+     *
+     * @param size wanted payload size
+     */
+    public void allocData( int size ) throws JavException {
+        int n = nAllocData( mPointer, size );
+        if( n != 0 ) {
+            throw new JavException( n, "Packet allocation failed" );
+        }
     }
     
     /**
@@ -76,8 +86,35 @@ public final class JavPacket extends AbstractRefable implements NativeObject {
     public void freeData() {
         nFreeData(mPointer);
     }
-    
-    
+
+    /**
+     * A reference to the reference-counted buffer where the packet data is stored.
+     * May be NULL, then the packet data is not reference-counted.
+     *
+     * @return new reference to buffer (that SHOULD be released), or {@code null} if not reference-counted.
+     */
+    public JavBufferRef buf() {
+        long n = nBuf( mPointer );
+        return n == 0 ? null : JavBufferRef.wrapPointer( n );
+    }
+
+    /**
+     * Sets buf field in packet with new reference to buffer. Note that this DOES NOT update the data pointer.
+     *
+     * @param ref Buffer to insert into array. May be null. Creates new reference if not null.
+     */
+    public void buf( JavBufferRef ref ) {
+        nBuf( mPointer, ref == null ? 0 : ref.pointer() );
+    }
+
+    /**
+     * @return capacity of payload buffer, differentt from {@code size()}, which only remaining bytes.
+     */
+    public int bufSize() {
+        return nBufSize( mPointer );
+    }
+
+
     public long dataPointer() {
         return nData( mPointer );
     }
@@ -88,14 +125,24 @@ public final class JavPacket extends AbstractRefable implements NativeObject {
     }
 
     /**
-     * Shifts the data pointer by adding n to the poniter
+     * Shifts the data pointer by adding n to the pointer
      * and subtracting n from size.
      */
     public void moveDataPointer( int n ) {
         nMoveData( mPointer, n );
     }
-    
-    
+
+    /**
+     * Shifts the data pointer back to the start of the payload buffer ({@code buf()})
+     * and sets size to size of the payload buffer.
+     *
+     * @return size of cleared buffer, or 0 if none.
+     */
+    public int resetDataPointer() {
+        return nResetData( mPointer );
+    }
+
+
     public int size() {
         return nSize( mPointer );
     }
@@ -256,10 +303,15 @@ public final class JavPacket extends AbstractRefable implements NativeObject {
     private static native void nFree( long pointer );
     private static native void nFreeData( long pointer );
     private static native int  nAllocData( long pointer, int size );
-    
+
+    private static native long nBuf( long pointer );
+    private static native void nBuf( long pointer, long bufPointer );
+    private static native int  nBufSize( long pointer );
+
     private static native long nData( long pointer );
     private static native void nData( long pointer, long dataPointer );
     private static native void nMoveData( long pointer, int n );
+    private static native int  nResetData( long pointer );
     private static native int  nSize( long pointer );
     private static native void nSize( long pointer, int size );
     private static native long nPts( long pointer );
@@ -277,10 +329,5 @@ public final class JavPacket extends AbstractRefable implements NativeObject {
     private static native long nConvergenceDuration( long pointer  );
     private static native void nConvergenceDuration( long pointer, long cd );
         
-    /**
-     * Unused for now.
-     */
-    private static native long nBuf( long pointer );
-    private static native void nBuf( long pointer, long bufPointer );
-    
+
 }

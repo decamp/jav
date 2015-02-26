@@ -34,5 +34,4 @@ JNIEXPORT void JNICALL Java_bits_jav_util_JavBufferPool_nUninit
 {
     AVBufferPool *pool = *(AVBufferPool**)&ptr;
     av_buffer_pool_uninit( &pool );
-    printf( "### DON\n"); fflush( 0 );
 }
