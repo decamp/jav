@@ -141,6 +141,61 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavPacket_nResetData
 }
 
 
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavPacket_nMakeWritable
+(JNIEnv *env, jclass clazz, jlong pointer, jint size, jlong poolPointer)
+{
+  AVPacket *p = *(AVPacket**)&pointer;
+  if( p->buf ) {
+    if( p->buf->size >= size && av_buffer_is_writable( p->buf ) ) {
+      p->data = p->buf->data;
+      p->size = p->buf->size;
+      return 0;
+    }
+
+    av_buffer_unref( &p->buf );
+    p->data = NULL;
+    p->size = 0;
+
+  } else if( p->data ) {
+    if( p->size >= size ) {
+      return 0;
+    }
+    av_free( p->data );
+    p->data = NULL;
+    p->size = 0;
+  }
+
+  if( poolPointer ) {
+    AVBufferPool *pool = *(AVBufferPool**)&poolPointer;
+    p->buf = av_buffer_pool_get( pool );
+    if( p->buf ) {
+      if( p->buf->size >= size ) {
+        p->data = p->buf->data;
+        p->size = p->buf->size;
+        return 0;
+      }
+      av_buffer_unref( &p->buf );
+    }
+  }
+
+  p->buf = av_buffer_alloc( size );
+  if( !p->buf ) {
+    return AVERROR( ENOMEM );
+  }
+
+  p->data = p->buf->data;
+  p->size = p->buf->size;
+  return 0;
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavPacket_nCopy
+(JNIEnv *env, jclass clazz, jlong pointer, jlong destPointer)
+{
+  return av_copy_packet( *(AVPacket**)&destPointer, *(AVPacket**)&pointer );
+}
+
+
 JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavPacket_nPts__J
 ( JNIEnv *env, jclass clazz, jlong pointer )
 {

@@ -142,6 +142,22 @@ public final class JavPacket extends AbstractRefable implements NativeObject {
         return nResetData( mPointer );
     }
 
+    /**
+     * Checks if packet buffer is writable (has only one reference) and is sufficient size.
+     * If not, allocates a new data buffer for the packet.
+     * @param size    Minimum size of packet.
+     * @param optPool [Optional] JavBufferPool to use to allocate new data buffer, if necessary.
+     * @return error code
+     */
+    public int makeWritable( int size, JavBufferPool optPool ) {
+        return nMakeWritable( mPointer, size, optPool == null ? null : optPool.pointer() );
+    }
+
+
+    public int copy( JavPacket dst ) {
+        return nCopy( mPointer, dst.pointer() );
+    }
+
 
     public int size() {
         return nSize( mPointer );
@@ -259,6 +275,7 @@ public final class JavPacket extends AbstractRefable implements NativeObject {
 
 
 
+
     public long pointer() {
         return mPointer;
     }
@@ -312,6 +329,9 @@ public final class JavPacket extends AbstractRefable implements NativeObject {
     private static native void nData( long pointer, long dataPointer );
     private static native void nMoveData( long pointer, int n );
     private static native int  nResetData( long pointer );
+    private static native int  nMakeWritable( long pointer, int n, long poolPointer );
+    private static native int  nCopy( long pointer, long dst );
+
     private static native int  nSize( long pointer );
     private static native void nSize( long pointer, int size );
     private static native long nPts( long pointer );

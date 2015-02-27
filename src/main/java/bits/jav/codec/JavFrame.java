@@ -376,7 +376,11 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     
     
     public void sampleAspectRatio( Rational sampleAspectRatio ) {
-        nSampleAspectRatio( mPointer, sampleAspectRatio.num(), sampleAspectRatio.den() );
+        if( sampleAspectRatio != null ) {
+            nSampleAspectRatio( mPointer, sampleAspectRatio.num(), sampleAspectRatio.den() );
+        } else {
+            nSampleAspectRatio( mPointer, 0, 1 );
+        }
     }
     
     /**
@@ -590,6 +594,17 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     public byte motionSubsampleLog2() {
         return nMotionSubsampleLog2( mPointer );
     }
+
+
+    /**
+     * log2 of the size of the block which a single vector in motion_val represents:
+     * (4->16x16, 3->8x8, 2-> 4x4, 1-> 2x2)
+     * - encoding: unused
+     * - decoding: Set by libavcodec.
+     */
+    public void motionSubsampleLog2( byte motionSub ) {
+        nMotionSubsampleLog2( mPointer, motionSub );
+    }
     
     /**
      * Sample rate of the audio data.
@@ -600,7 +615,17 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     public int sampleRate() {
         return nSampleRate( mPointer );
     }
-        
+
+    /**
+     * Sample rate of the audio data.
+     *
+     * - encoding: unused
+     * - decoding: read by user
+     */
+    public void sampleRate( int rate ) {
+        nSampleRate( mPointer, rate );
+    }
+
     /**
      * Channel layout of the audio data.
      *
@@ -609,6 +634,16 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      */
     public long channelLayout() {
         return nChannelLayout( mPointer );
+    }
+
+    /**
+     * Channel layout of the audio data.
+     *
+     * - encoding: unused
+     * - decoding: read by user.
+     */
+    public void channelLayout( long channelLayout ) {
+        nChannelLayout( mPointer, channelLayout );
     }
 
     /**
@@ -835,7 +870,20 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     public int decodeErrorFlags() {
         return nDecodeErrorFlags( mPointer );
     }
-    
+
+    /**
+     * decode error flags of the frame, set to a combination of
+     * FF_DECODE_ERROR_xxx flags if the decoder produced a frame, but there
+     * were errors during the decoding.
+     * Code outside libavcodec should access this field using:
+     * av_frame_get_decode_error_flags(frame)
+     * - encoding: unused
+     * - decoding: set by libavcodec, read by user.
+     */
+    public void decodeErrorFlags( int flags ) {
+        nDecodeErrorFlags( mPointer, flags );
+    }
+
     /**
      * number of audio channels, only used for audio.
      * 
@@ -844,6 +892,16 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      */
     public int channels() {
         return nChannels( mPointer );
+    }
+
+    /**
+     * number of audio channels, only used for audio.
+     *
+     * - encoding: unused
+     * - decoding: Read by user.
+     */
+    public void channels( int chans ) {
+        nChannels( mPointer, chans );
     }
     
     

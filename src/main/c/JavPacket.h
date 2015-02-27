@@ -105,6 +105,22 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavPacket_nResetData
 
 /*
  * Class:     bits_jav_codec_JavPacket
+ * Method:    nMakeWritable
+ * Signature: (JIJ)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavPacket_nMakeWritable
+  (JNIEnv *, jclass, jlong, jint, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavPacket
+ * Method:    nCopy
+ * Signature: (JJ)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavPacket_nCopy
+  (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavPacket
  * Method:    nSize
  * Signature: (J)I
  */
