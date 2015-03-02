@@ -302,6 +302,39 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nAllBufsMinSize
 }
 
 
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nIsWritable
+( JNIEnv *env, jclass clazz, jlong pointer )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    return av_frame_is_writable( frame );
+}
+
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nMakeWritable
+( JNIEnv *env, jclass clazz, jlong pointer )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    return av_frame_make_writable( frame );
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nCopy
+( JNIEnv *env, jclass clazz, jlong pointer, jlong srcPointer )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    const AVFrame *source = *(AVFrame**)&srcPointer;
+    return av_frame_copy( frame, source );
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nCopyProps
+( JNIEnv *env, jclass clazz, jlong pointer, jlong srcPointer )
+{
+    AVFrame *frame = *(AVFrame**)&pointer;
+    const AVFrame *source = *(AVFrame**)&srcPointer;
+    return av_frame_copy_props( frame, source );
+}
+
+
 JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nSampleAspectRatio__J
 (JNIEnv* env, jclass clazz, jlong pointer)
 {

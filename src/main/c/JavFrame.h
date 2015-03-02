@@ -659,6 +659,38 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nAllBufsMinSize
 
 /*
  * Class:     bits_jav_codec_JavFrame
+ * Method:    nIsWritable
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nIsWritable
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nMakeWritable
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nMakeWritable
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nCopy
+ * Signature: (JJ)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nCopy
+  (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
+ * Method:    nCopyProps
+ * Signature: (JJ)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nCopyProps
+  (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     bits_jav_codec_JavFrame
  * Method:    nBestEffortTimestamp
  * Signature: (J)J
  */

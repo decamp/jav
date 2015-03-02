@@ -805,6 +805,64 @@ public class JavFrame extends AbstractRefable implements NativeObject {
         return Math.max( 0, nAllBufsMinSize( mPointer ) - Jav.FF_INPUT_BUFFER_PADDING_SIZE );
     }
 
+    /**
+     * Check if the frame data is writable.
+     *
+     * @return A positive value if the frame data is writable (which is true if and
+     * only if each of the underlying buffers has only one reference, namely the one
+     * stored in this frame). Return 0 otherwise.
+     *
+     * If 1 is returned the answer is valid until av_buffer_ref() is called on any
+     * of the underlying AVBufferRefs (e.g. through av_frame_ref() or directly).
+     *
+     * @see #makeWritable()
+     * @see JavBufferRef#isWritable()
+     */
+    public boolean isWritable() {
+        return nIsWritable( mPointer ) > 0;
+    }
+
+    /**
+     * Ensure that the frame data is writable, avoiding data copy if possible.
+     *
+     * Do nothing if the frame is writable, allocate new buffers and copy the data
+     * if it is not.
+     *
+     * @return 0 on success, a negative AVERROR on error.
+     *
+     * @see #isWritable()
+     * @see JavBufferRef#makeWritable()
+     */
+    public int makeWritable() {
+        return nMakeWritable( mPointer );
+    }
+
+    /**
+     * Copy the frame data from src to this.
+     *
+     * This function does not allocate anything, dst must be already initialized and
+     * allocated with the same parameters as src.
+     *
+     * This function only copies the frame data (i.e. the contents of the data /
+     * extended data arrays), not any other properties.
+     *
+     * @return >= 0 on success, a negative AVERROR on error.
+     */
+    public int copy( JavFrame src ) {
+        return nCopy( mPointer, src.mPointer );
+    }
+
+    /**
+     * Copy only "metadata" fields from src to dst.
+     *
+     * Metadata for the purpose of this function are those fields that do not affect
+     * the data layout in the buffers.  E.g. pts, sample rate (for audio) or sample
+     * aspect ratio (for video), but not width/height or channel layout.
+     * Side data is also copied.
+     */
+    public int copyProps( JavFrame src ) {
+        return nCopyProps( mPointer, src.mPointer );
+    }
 
     /**
      * frame timestamp estimated using various heuristics, in stream time base
@@ -991,6 +1049,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
 
     //** Ownership **//
 
+
     public long pointer() {
         return mPointer;
     }
@@ -1109,7 +1168,10 @@ public class JavFrame extends AbstractRefable implements NativeObject {
 
     private static native int  nNbAllBufs( long pointer );
     private static native int  nAllBufsMinSize( long pointer );
-
+    private static native int  nIsWritable( long pointer );
+    private static native int  nMakeWritable( long pointer );
+    private static native int  nCopy( long pointer, long srcPointer );
+    private static native int  nCopyProps( long pointer, long srcPointer );
 
     private static native long nBestEffortTimestamp( long pointer );
     private static native long nPktPos( long pointer );
@@ -1132,6 +1194,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
                                                 ByteBuffer buf,
                                                 int bufOff,
                                                 int bufLen );
+
 
     protected static native int nComputeVideoBufferSize( int w, int h, int pixelFormat );
 
