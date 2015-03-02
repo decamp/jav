@@ -55,6 +55,13 @@ public class Jav {
     }
 
 
+    public static ByteBuffer allocEncodingBuffer( int size ) {
+        size = Math.max( size + FF_INPUT_BUFFER_PADDING_SIZE, FF_MIN_BUFFER_SIZE );
+        return ByteBuffer.allocateDirect( size ).order( ByteOrder.nativeOrder() );
+    }
+
+
+
     //==============================================================
     // 01_util
     //==============================================================

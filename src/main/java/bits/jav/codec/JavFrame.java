@@ -57,9 +57,8 @@ public class JavFrame extends AbstractRefable implements NativeObject {
             throw new OutOfMemoryError();
         }
 
-        int size = nComputeVideoBufferSize( w, h, pixFormat ) + Jav.FF_INPUT_BUFFER_PADDING_SIZE;
-        size = Math.max( size, Jav.FF_MIN_BUFFER_SIZE );
-        ByteBuffer buf = Jav.allocBuffer( size );
+        int size = nComputeVideoBufferSize( w, h, pixFormat );
+        ByteBuffer buf = Jav.allocEncodingBuffer( size );
         buf.order( ByteOrder.nativeOrder() );
 
         return allocVideo( w, h, pixFormat, buf, optPool );
@@ -93,7 +92,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
                                        ObjectPool<? super JavFrame> optPool )
     {
         int size = JavSampleFormat.getBufferSize( channels, samplesPerChannel, sampleFormat, align, null );
-        ByteBuffer buf = Jav.allocBuffer( size );
+        ByteBuffer buf = Jav.allocEncodingBuffer( size );
         buf.order( ByteOrder.nativeOrder() );
         return allocAudio( channels, samplesPerChannel, sampleFormat, align, buf, optPool );
     }
