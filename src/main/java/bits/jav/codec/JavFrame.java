@@ -699,7 +699,12 @@ public class JavFrame extends AbstractRefable implements NativeObject {
         return ret == null ? null : ret.duplicate().order( ret.order() );
     }
 
-
+    /**
+     * @return Raw size of data buffer element.
+     */
+    public int bufElemSize( int layer ) {
+        return nBufElemSize( mPointer, layer );
+    }
 
     /**
      * @return Useable size of data buffer (size - padding)
