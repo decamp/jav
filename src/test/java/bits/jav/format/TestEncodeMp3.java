@@ -281,7 +281,7 @@ public class TestEncodeMp3 {
             
             int samps = frame.nbSamples();
             if( buf == null || buf.capacity() < 4 * samps ) {
-                buf = Jav.allocBuffer( 4 * samps );
+                buf = Jav.allocEncodingBuffer( 4 * samps );
             }
 
             int len = Math.min( audio[0].length - samplePos, samps );

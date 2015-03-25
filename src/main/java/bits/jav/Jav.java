@@ -46,20 +46,18 @@ public class Jav {
 
     /**
      * Use this method to allocate ByteBuffers.
-     * It will set up appropriate byte ordering and
-     * necessary padding.
+     * It will set up appropriate byte ordering.
      */
-    public static ByteBuffer allocBuffer( int size ) {
-        ByteBuffer ret = ByteBuffer.allocateDirect( size + FF_INPUT_BUFFER_PADDING_SIZE );
-        return ret.order( ByteOrder.nativeOrder() );
-    }
-
-
-    public static ByteBuffer allocEncodingBuffer( int size ) {
-        size = Math.max( size + FF_INPUT_BUFFER_PADDING_SIZE, FF_MIN_BUFFER_SIZE );
+    public static ByteBuffer alloc( int size ) {
         return ByteBuffer.allocateDirect( size ).order( ByteOrder.nativeOrder() );
     }
 
+    /**
+     * Like alloc(), but ensures buffer has appropriate padding.
+     */
+    public static ByteBuffer allocEncodingBuffer( int size ) {
+        return alloc( Math.max( size + FF_INPUT_BUFFER_PADDING_SIZE, FF_MIN_BUFFER_SIZE ) );
+    }
 
 
     //==============================================================
