@@ -10,7 +10,6 @@ public static synchronized void init() {
     nInit();
 }
 
-
 /**
  * Checks if return code {@code err} indicates an error, and if so,
  * throws that error as a JavException.
@@ -20,7 +19,6 @@ public static void assertOkay( int err ) throws JavException {
         throw JavException.fromErr( err );
     }
 }
-
 
 /**
  * Use this method to allocate ByteBuffers.
@@ -34,5 +32,13 @@ public static ByteBuffer alloc( int size ) {
  * Like alloc(), but ensures buffer has appropriate padding.
  */
 public static ByteBuffer allocEncodingBuffer( int size ) {
-    return alloc( Math.max( size + FF_INPUT_BUFFER_PADDING_SIZE, FF_MIN_BUFFER_SIZE ) );
+    return alloc( encodingBufferSize( size ) );
+}
+
+/**
+ * @param useableSize Minimum size needed for encoding buffer.
+ * @return actual size of buffer including padding and min buffer size constraints.
+ */
+public static int encodingBufferSize( int useableSize ) {
+    return Math.max( useableSize + FF_INPUT_BUFFER_PADDING_SIZE, FF_MIN_BUFFER_SIZE );
 }

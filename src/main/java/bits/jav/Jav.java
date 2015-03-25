@@ -56,7 +56,15 @@ public class Jav {
      * Like alloc(), but ensures buffer has appropriate padding.
      */
     public static ByteBuffer allocEncodingBuffer( int size ) {
-        return alloc( Math.max( size + FF_INPUT_BUFFER_PADDING_SIZE, FF_MIN_BUFFER_SIZE ) );
+        return alloc( encodingBufferSize( size ) );
+    }
+
+    /**
+     * @param useableSize Minimum size needed for encoding buffer.
+     * @return actual size of buffer including padding and min buffer size constraints.
+     */
+    public static int encodingBufferSize( int useableSize ) {
+        return Math.max( useableSize + FF_INPUT_BUFFER_PADDING_SIZE, FF_MIN_BUFFER_SIZE );
     }
 
 
