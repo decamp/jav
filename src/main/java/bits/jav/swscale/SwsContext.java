@@ -71,8 +71,8 @@ public final class SwsContext implements JavClass {
         }
         
         SwsContext ret = new SwsContext( p );
-        assertNoErr( ret.config( srcWidth, srcHeight, srcFormat, dstWidth, dstHeight, dstFormat, flags ) );
-        assertNoErr( ret.init() );
+        assertOkay( ret.config( srcWidth, srcHeight, srcFormat, dstWidth, dstHeight, dstFormat, flags ) );
+        assertOkay( ret.init() );
         return ret;
     }
     
@@ -276,7 +276,7 @@ public final class SwsContext implements JavClass {
      * @deprecated
      */
     public void initialize() throws JavException {
-        assertNoErr( init() );
+        assertOkay( init() );
     }
 
 
@@ -303,7 +303,7 @@ public final class SwsContext implements JavClass {
                            int flags )
                            throws JavException
     {
-        assertNoErr( config( srcWidth, srcHeight, srcFormat, dstWidth, dstHeight, dstFormat, flags ) );
+        assertOkay( config( srcWidth, srcHeight, srcFormat, dstWidth, dstHeight, dstFormat, flags ) );
     }
 
     /**

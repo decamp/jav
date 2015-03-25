@@ -110,7 +110,11 @@ public class JavFrame extends AbstractRefable implements NativeObject {
             throw new OutOfMemoryError();
         }
         JavFrame ret = new JavFrame( pointer, pool );
-        ret.fillAudioFrame( channels, samplesPerChannel, sampleFormat, buf, align );
+        try {
+            ret.fillAudioFrame( channels, samplesPerChannel, sampleFormat, buf, align );
+        } catch( JavException e ) {
+            throw new RuntimeException( e );
+        }
         return ret;
     }
     
@@ -1000,7 +1004,7 @@ public class JavFrame extends AbstractRefable implements NativeObject {
 
         int bytes = nFillVideoFrame( mPointer, width, height, pixFmt, optBuf, bufPos, bufLen );
         if( bytes < 0 ) {
-            throw new JavException( "Fill video frame failed: " + bytes );
+            throw new JavException( bytes, "Failed to initialize video frame buffers." );
         }
 
         return bytes;
@@ -1026,11 +1030,12 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * @param buf                Directly allocated ByteBuffer containing audio data. Position and limit are used.
      * @param align              Byte alignment for plane size. Normally 0.
      */
-    public void fillAudioFrame( int channels,
-                                int samplesPerChannel,
-                                int sampleFormat,
-                                ByteBuffer buf,
-                                int align )
+    public int fillAudioFrame( int channels,
+                               int samplesPerChannel,
+                               int sampleFormat,
+                               ByteBuffer buf,
+                               int align )
+                               throws JavException
     {
         int bytes = nFillAudioFrame( mPointer,
                                      channels,
@@ -1042,8 +1047,10 @@ public class JavFrame extends AbstractRefable implements NativeObject {
                                      buf.remaining() );
         
         if( bytes < 0 ) {
-            throw new RuntimeException( "Unknown exception filling nativeBuffer: " + bytes );
+            throw new JavException( bytes, "Failed to initialize audio frame buffers." );
         }
+
+        return bytes;
     }
 
 
