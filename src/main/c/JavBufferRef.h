@@ -105,6 +105,14 @@ JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nRealloc
 
 /*
  * Class:     bits_jav_util_JavBufferRef
+ * Method:    nReset
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nReset
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     bits_jav_util_JavBufferRef
  * Method:    nJavaByteBuffer
  * Signature: (J)Ljava/nio/ByteBuffer;
  */

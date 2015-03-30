@@ -136,6 +136,17 @@ JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nRealloc
 }
 
 
+JNIEXPORT jint JNICALL Java_bits_jav_util_JavBufferRef_nReset
+( JNIEnv *env, jclass clazz, jlong ptr )
+{
+	AVBufferRef *ref = *(AVBufferRef**)&ptr;
+	ref->data = ref->buffer->data;
+	ref->size = ref->buffer->size;
+	return ref->size;
+}
+
+
+
 JNIEXPORT jobject JNICALL Java_bits_jav_util_JavBufferRef_nJavaByteBuffer
 ( JNIEnv *env, jclass clazz, jlong ptr )
 {

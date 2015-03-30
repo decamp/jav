@@ -225,6 +225,16 @@ public class JavBufferRef implements NativeObject {
     }
 
     /**
+     * Resets this reference to have same data pointer and size as
+     * underlying buffer.
+     *
+     * @return size of reset JavBufferRef. May be 0.
+     */
+    public synchronized int reset() {
+        return nReset( mPointer );
+    }
+
+    /**
      * @return true iff this object is backed by a java-allocated ByteBuffer.
      */
     public boolean hasJavaBuffer() {
@@ -272,15 +282,16 @@ public class JavBufferRef implements NativeObject {
 
     private static native long nBuffer( long pointer );
     private static native long nData( long pointer );
-    private static native int nSize( long pointer );
+    private static native int  nSize( long pointer );
 
     private static native long nRef( long pointer );
     private static native void nUnref( long pointer );
-    private static native int nRefCount( long pointer );
+    private static native int  nRefCount( long pointer );
     
     private static native int nIsWritable( long pointer );
     private static native int nMakeWritable( long pointer );
     private static native int nRealloc( long[] pointer, int size );
+    private static native int nReset( long pointer );
 
     private static native ByteBuffer nJavaByteBuffer( long pointer );
 

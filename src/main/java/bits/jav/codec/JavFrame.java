@@ -598,7 +598,6 @@ public class JavFrame extends AbstractRefable implements NativeObject {
         return nMotionSubsampleLog2( mPointer );
     }
 
-
     /**
      * log2 of the size of the block which a single vector in motion_val represents:
      * (4->16x16, 3->8x8, 2-> 4x4, 1-> 2x2)
@@ -707,11 +706,23 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     }
 
     /**
+     * Resets buffer element
+     *
+     * @param idx Index into buf array.
+     * @return the size of reset buffer.
+     * @see bits.jav.util.JavBufferRef#reset()
+     */
+    public int bufElemReset( int idx ) {
+        return nBufElemReset( mPointer, idx );
+    }
+
+    /**
      * @return Useable size of data buffer (size - padding)
      */
     public int useableBufElemSize( int layer ) {
         return Math.max( 0, nBufElemSize( mPointer, layer ) - Jav.FF_INPUT_BUFFER_PADDING_SIZE );
     }
+
 
     /**
      * @return direct pointer to extended_buf field.
@@ -772,8 +783,18 @@ public class JavFrame extends AbstractRefable implements NativeObject {
      * @param ref Buffer to insert into array. May be null. Creates new reference if not null.
      */
     public void extendedBufElem( int idx, JavBufferRef ref ) {
-
         nExtendedBufElem( mPointer, idx, ref == null ? 0L : ref.pointer() );
+    }
+
+    /**
+     * Resets buffer element
+     *
+     * @param idx Index into buf array.
+     * @return the size of reset buffer.
+     * @see bits.jav.util.JavBufferRef#reset()
+     */
+    public int extendedBufElemReset( int idx ) {
+        return nExtendedBufElemReset( mPointer, idx );
     }
 
     /**
@@ -1167,14 +1188,16 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     private static native long nBuf( long pointer );
     private static native long nBufElem( long pointer, int idx );
     private static native void nBufElem( long pointer, int idx, long ref );
-    private static native ByteBuffer nJavaBufElem( long pointer, int idx );
     private static native int  nBufElemSize( long pointer, int layer );
+    private static native int  nBufElemReset( long pointer, int layer );
+    private static native ByteBuffer nJavaBufElem( long pointer, int idx );
     private static native long nExtendedBuf( long pointer );
     private static native void nExtendedBuf( long pointer, long bufPointer );
     private static native long nExtendedBufElem( long pointer, int idx );
     private static native void nExtendedBufElem( long pointer, int idx, long ref );
-    private static native ByteBuffer nJavaExtendedBufElem( long pointer, int idx );
     private static native int  nExtendedBufElemSize( long pointer, int layer );
+    private static native int  nExtendedBufElemReset( long pointer, int layer );
+    private static native ByteBuffer nJavaExtendedBufElem( long pointer, int idx );
     private static native int  nNbExtendedBuf( long pointer );
     private static native void nNbExtendedBuf( long pointer, int nb );
 

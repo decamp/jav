@@ -176,6 +176,18 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nBufElemSize
     return ref ? ref->size : 0;
 }
 
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nBufElemReset
+(JNIEnv *env, jclass clazz, jlong pointer, jint idx )
+{
+    AVBufferRef *ref = (**(AVFrame**)&pointer).buf[idx];
+    if( ref ) {
+        ref->data = ref->buffer->data;
+        ref->size = ref->buffer->size;
+        return ref->size;
+    }
+
+    return 0;
+}
 
 JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nExtendedBuf__J
 ( JNIEnv *env, jclass clazz, jlong pointer )
@@ -230,6 +242,20 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nExtendedBufElemSize
 {
     AVBufferRef *ref = (**(AVFrame**)&pointer).extended_buf[idx];
     return ref ? ref->size : 0;
+}
+
+
+JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nExtendedBufElemReset
+(JNIEnv *env, jclass clazz, jlong pointer, jint idx )
+{
+    AVBufferRef *ref = (**(AVFrame**)&pointer).extended_buf[idx];
+    if( ref ) {
+        ref->data = ref->buffer->data;
+        ref->size = ref->buffer->size;
+        return ref->size;
+    }
+
+    return 0;
 }
 
 
