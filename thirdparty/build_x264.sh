@@ -6,9 +6,13 @@ libdir='x264'
 cd `dirname "$0"`
 basedir=`pwd`
 workdir=$basedir/$libdir
+
 cd ..
 projdir=`pwd`
 scratch=$projdir/scratch/thirdparty/$libname
+
+
+
 
 if [ ! -d $workdir ]; then
   >&2 echo "No directory: $workdir"
