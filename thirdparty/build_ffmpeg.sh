@@ -6,10 +6,14 @@ libdir='ffmpeg'
 cd `dirname "$0"`
 basedir=`pwd`
 workdir=$basedir/$libdir
+
 cd ..
 projdir=`pwd`
 incdir=$projdir/scratch/thirdparty
 scratch=$projdir/scratch/thirdparty/$libname
+
+source buildtools/detect_platform.sh
+
 
 if [ ! -d $workdir ]; then
   >&2 echo "No directory: $workdir"
@@ -47,7 +51,7 @@ for cmd in ${cmds[@]}; do
         --enable-libmp3lame \
         --enable-libx264 \
         --disable-ffplay \
-        --extra-cflags="-E$incdir/lame/include -E$incdir/x264/include" \
+        --extra-cflags="-I$incdir/lame/include -I$incdir/x264/include" \
         --extra-ldflags="-L$incdir/lame/lib -L$incdir/x264/lib"
       
       # Apply patches.
@@ -66,19 +70,21 @@ for cmd in ${cmds[@]}; do
       make install
       
       # Make library paths relative.
-      $projdir/buildtools/rename_dylib $scratch/lib @loader_path true
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+          $projdir/buildtools/rename_dylib $scratch/lib @loader_path true
+      fi
             
       # Move libraries into place.
-      names[0]=libavutil
-      names[1]=libavcodec
-      names[2]=libavformat
-      names[3]=libavdevice
-      names[4]=libavfilter
-      names[5]=libswscale
-      names[6]=libswresample
-      names[7]=libpostproc
+      names[0]=avutil
+      names[1]=avcodec
+      names[2]=avformat
+      names[3]=avdevice
+      names[4]=avfilter
+      names[5]=swscale
+      names[6]=swresample
+      names[7]=postproc
       for name in ${names[@]}; do
-        cp $scratch/lib/$name.dylib $projdir/lib
+        cp $scratch/lib/$(gen_soname $name '') $projdir/lib
       done
       ;;
 
