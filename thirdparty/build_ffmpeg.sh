@@ -47,7 +47,7 @@ for cmd in ${cmds[@]}; do
         --enable-libmp3lame \
         --enable-libx264 \
         --disable-ffplay \
-        --extra-cflags="-E$incdir/lame/include -E$incdir/x264/include" \
+        --extra-cflags="-I$incdir/lame/include -I$incdir/x264/include" \
         --extra-ldflags="-L$incdir/lame/lib -L$incdir/x264/lib"
       
       # Apply patches.
