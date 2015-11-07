@@ -6,10 +6,12 @@ libdir='lame-3.99.5'
 cd `dirname "$0"`
 basedir=`pwd`
 workdir=$basedir/$libdir
-cd `dirname "$0"`/..
+
+cd ..
 projdir=`pwd`
 scratch=$projdir/scratch/thirdparty/$libname
 
+source buildtools/detect_platform.sh
 
 if [ $# -lt 1 ]; then
   cmds=("clean" "configure" "compile" "install")
@@ -61,8 +63,13 @@ for cmd in ${cmds[@]}; do
       cd $workdir
       make install
       # Make library paths relative.
-      $projdir/buildtools/rename_dylib $scratch/lib @loader_path true
-      cp $scratch/lib/libmp3lame.0.dylib $projdir/lib/libmp3lame.dylib
+      shortName=$(gen_soname 'mp3lame' '')
+      longName=$(gen_soname 'mp3lame' '.0')
+      
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+          $projdir/buildtools/rename_dylib $scratch/lib @loader_path true
+      fi
+      cp $scratch/lib/$longName $projdir/lib/$shortName
       ;;
 
     *)

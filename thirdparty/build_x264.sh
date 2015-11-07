@@ -6,9 +6,13 @@ libdir='x264'
 cd `dirname "$0"`
 basedir=`pwd`
 workdir=$basedir/$libdir
+
 cd ..
 projdir=`pwd`
 scratch=$projdir/scratch/thirdparty/$libname
+
+source buildtools/detect_platform.sh
+
 
 if [ ! -d $workdir ]; then
   >&2 echo "No directory: $workdir"
@@ -48,13 +52,18 @@ for cmd in ${cmds[@]}; do
       echo "### Install..."
       cd $workdir
       make install-lib-shared
-      rm ${scratch}/lib/libx264.dylib
-      mv ${scratch}/lib/libx264.142.dylib ${scratch}/lib/libx264.dylib
+
+      shortName=$(gen_soname 'x264' '' )
+      longName=$(gen_soname 'x264' '.142' )
+      
+      rm $scratch/lib/$shortName
+      mv $scratch/lib/$longName $scratch/lib/$shortName
       
       # Make library paths relative.
-      ${projdir}/buildtools/rename_dylib ${scratch}/lib @loader_path true
-      
-      cp ${scratch}/lib/libx264.dylib ${projdir}/lib/libx264.dylib
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+          ${projdir}/buildtools/rename_dylib ${scratch}/lib @loader_path true
+      fi
+      cp $scratch/lib/$shortName $projdir/lib/$shortName
       ;;
 
     *)
