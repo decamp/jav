@@ -247,33 +247,6 @@ public final class JavPacket extends AbstractRefable implements NativeObject {
         nPos( mPointer, pos );
     }
 
-    /**
-     * Time difference in AVStream->time_base units from the pts of this
-     * packet to the point at which the output from the decoder has converged
-     * independent from the availability of previous frames. That is, the
-     * frames are virtually identical no matter if decoding started from
-     * the very first frame or from this keyframe.
-     * Is AV_NOPTS_VALUE if unknown.
-     * This field is not the display duration of the current packet.
-     * This field has no meaning if the packet does not have AV_PKT_FLAG_KEY
-     * set.
-     *
-     * The purpose of this field is to allow seeking in streams that have no
-     * keyframes in the conventional sense. It corresponds to the
-     * recovery point SEI in H.264 and match_time_delta in NUT. It is also
-     * essential for some types of subtitle streams to ensure that all
-     * subtitles are correctly displayed after seeking.
-     */
-    public long convergenceDuration() {
-        return nConvergenceDuration( mPointer );
-    }
-
-
-    public void convergenceDuration( long cd ) {
-        nConvergenceDuration( mPointer, cd );
-    }
-
-
 
 
     public long pointer() {
@@ -346,8 +319,5 @@ public final class JavPacket extends AbstractRefable implements NativeObject {
     private static native void nFlags( long pointer, int flags );
     private static native long nPos( long pointer  );
     private static native void nPos( long pointer, long pos );
-    private static native long nConvergenceDuration( long pointer  );
-    private static native void nConvergenceDuration( long pointer, long cd );
-        
 
 }

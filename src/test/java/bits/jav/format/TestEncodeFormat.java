@@ -12,12 +12,10 @@ import java.nio.*;
 
 import bits.jav.Jav;
 import bits.jav.codec.*;
-import bits.jav.format.*;
 import bits.jav.swscale.SwsContext;
 import bits.jav.util.*;
 
 import static bits.jav.Jav.*;
-import static bits.jav.JavException.assertNoErr;
 
 
 public class TestEncodeFormat {
@@ -99,7 +97,7 @@ public class TestEncodeFormat {
             packet.size( 1024*1024 );
             
             if( frameCount < maxFrameCount ) {
-                ByteBuffer buf = srcFrame.directBuffer();
+                ByteBuffer buf = srcFrame.javaBufElem( 0 );
                 buf.clear();
                 buf.order( ByteOrder.BIG_ENDIAN );
                 int v = 0xFFFF0000 + (( frameCount % 256 ) * 0x00000101 ); 

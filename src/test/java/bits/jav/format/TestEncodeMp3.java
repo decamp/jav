@@ -9,6 +9,7 @@ package bits.jav.format;
 
 import java.io.*;
 import java.nio.*;
+import java.nio.channels.FileChannel;
 
 import bits.jav.Jav;
 import bits.jav.JavException;
@@ -25,94 +26,95 @@ public class TestEncodeMp3 {
 
     public static void main( String[] args ) throws Exception {
         Jav.init();
+//        testEncode();
         testFormatEncode();
     }
 
-//    @SuppressWarnings( "resource" )
-//    static void testEncode() throws Exception {
-//        float[][] audio = readAudio();
-//
-//        JavCodec codec = JavCodec.findEncoder( AV_CODEC_ID_MP3 );
-//        System.out.format( "Got codec: 0x%08X\n", codec.pointer() );
-//        JavCodecContext context = JavCodecContext.alloc( null );
-//        System.out.format( "Got context: 0x%08X\n", context.pointer() );
-//
-//        // Sample params
-//        context.bitRate( 128000 );
-//        context.sampleFormat( AV_SAMPLE_FMT_S16P );
-//        context.sampleRate( 48000 );
-//        context.channels( audio.length );
-//        context.open( codec );
-//
-//        int frameSize  = context.frameSize();
-//        int chans      = context.channels();
-//        int sampFormat = context.sampleFormat();
-//        JavFrame frame = JavFrame.allocAudio( chans, frameSize, sampFormat, 0, null );
-//
-//        JavPacket packet   = JavPacket.alloc();
-//        File outFile       = new File( "/tmp/audio_test.mp3" );
-//        FileChannel out    = new FileOutputStream( outFile ).getChannel();
-//
-//        int pos = 0;
-//        ByteBuffer b    = frame.directBuffer();
-//        int[] gotPacket = { 0 };
-//
-//        while( true ) {
-//            JavFrame writeFrame = null;
-//
-//            if( pos < audio[0].length ) {
-//                int lineSize = frame.lineSize( 0 );
-//                int len = Math.min( audio[0].length - pos, lineSize / 2 );
-//                frame.nbSamples( len );
-//
-//                b.clear();
-//
-//                for( int chan = 0; chan < audio.length; chan++ ) {
-//                    b.position( chan * lineSize );
-//                    for( int i = 0; i < len; i++ ) {
-//                        b.putShort( (short)( audio[chan][i+pos] * Short.MAX_VALUE ) );
-//                    }
-//                }
-//
-//                b.flip();
-//                writeFrame = frame;
-//                pos += len;
-//            }
-//
-//            if( writeFrame == null ) {
-//                System.out.println( "w null" );
-//            } else {
-//                System.out.println( "w " + writeFrame.nbSamples() );
-//            }
-//
-//            if( context.encodeAudio( writeFrame, packet, gotPacket ) < 0 ) {
-//                throw new IOException( "Encode failed." );
-//            }
-//
-//            if( gotPacket[0] == 0 ) {
-//                if( writeFrame == null ) {
-//                    // Done
-//                    break;
-//                } else {
-//                    continue;
-//                }
-//            }
-//
-//            System.out.println( "ww -> " + packet.size() );
-//            b.clear();
-//            b.limit( packet.size() );
-//            JavMem.copy( packet.dataElem(), b );
-//            b.flip();
-//
-//            out.write( b );
-//            packet.freeData();
-//            packet.init();
-//        }
-//
-//        out.close();
-//    }
-//
-//
+    @SuppressWarnings( "resource" )
+    static void testEncode() throws Exception {
+        float[][] audio = readAudio();
+
+        JavCodec codec = JavCodec.findEncoder( AV_CODEC_ID_MP3 );
+        System.out.format( "Got codec: 0x%08X\n", codec.pointer() );
+        JavCodecContext context = JavCodecContext.alloc( null );
+        System.out.format( "Got context: 0x%08X\n", context.pointer() );
+
+        // Sample params
+        context.bitRate( 128000 );
+        context.sampleFormat( AV_SAMPLE_FMT_S16P );
+        context.sampleRate( 48000 );
+        context.channels( audio.length );
+        context.open( codec );
+
+        int frameSize  = context.frameSize();
+        int chans      = context.channels();
+        int sampFormat = context.sampleFormat();
+        JavFrame frame = JavFrame.allocAudio( chans, frameSize, sampFormat, 0, null );
+
+        JavPacket packet   = JavPacket.alloc();
+        File outFile       = new File( "/tmp/audio_test.mp3" );
+        FileChannel out    = new FileOutputStream( outFile ).getChannel();
+
+        int pos = 0;
+        ByteBuffer b    = frame.javaBufElem( 0 );
+        int[] gotPacket = { 0 };
+
+        while( true ) {
+            JavFrame writeFrame = null;
+
+            if( pos < audio[0].length ) {
+                int lineSize = frame.lineSize( 0 );
+                int len = Math.min( audio[0].length - pos, lineSize / 2 );
+                frame.nbSamples( len );
+
+                b.clear();
+
+                for( int chan = 0; chan < audio.length; chan++ ) {
+                    b.position( chan * lineSize );
+                    for( int i = 0; i < len; i++ ) {
+                        b.putShort( (short)( audio[chan][i+pos] * Short.MAX_VALUE ) );
+                    }
+                }
+
+                b.flip();
+                writeFrame = frame;
+                pos += len;
+            }
+
+            if( writeFrame == null ) {
+                System.out.println( "w null" );
+            } else {
+                System.out.println( "w " + writeFrame.nbSamples() );
+            }
+
+            if( context.encodeAudio( writeFrame, packet, gotPacket ) < 0 ) {
+                throw new IOException( "Encode failed." );
+            }
+
+            if( gotPacket[0] == 0 ) {
+                if( writeFrame == null ) {
+                    // Done
+                    break;
+                } else {
+                    continue;
+                }
+            }
+
+            System.out.println( "ww -> " + packet.size() );
+            b.clear();
+            b.limit( packet.size() );
+            JavMem.copy( packet.dataPointer(), b );
+            b.flip();
+
+            out.write( b );
+            packet.freeData();
+            packet.init();
+        }
+
+        out.close();
+    }
+
+
 
     static void testFormatEncode() throws Exception {
         Jav.init();
@@ -151,7 +153,7 @@ public class TestEncodeMp3 {
             dict.set( "artist", "Artist", 0 );
             dict.set( "album", "Album", 0 );
             dict.set( "title", "Title", 0 );
-            
+
             System.out.println( "DictSize: " + dict.count() );
             format.metadata( dict );
         }
@@ -160,18 +162,17 @@ public class TestEncodeMp3 {
         format.writeHeader();
         System.out.println( "Header written... ");
 
-        
         JavFrame frame     = JavFrame.allocAudio( chans, frameSize, sampFormat, 0, null );
         JavPacket packet   = JavPacket.alloc();
         //packet.allocData( 1024 * 1024 );
         
         int pos = 0;
-        ByteBuffer b = frame.directBuffer();
+        ByteBuffer b = frame.javaBufElem( 0 );
         int[] gotPacket = { 0 };
         
         while( pos < audio.length ) {
             b.clear();
-            int len = Math.min( audio.length - pos, b.remaining() / 2 );
+            int len = Math.min( audio.length - pos, frameSize );
 
             for( int i = 0; i < len; i++ ) {
                 b.putShort( (short)( audio[i+pos] * Short.MAX_VALUE ) );
@@ -181,8 +182,9 @@ public class TestEncodeMp3 {
             b.flip();
             frame.nbSamples( b.remaining() / 2 );
 
-            if( cc.encodeAudio( frame, packet, gotPacket ) < 0 ) {
-                throw new IOException( "Encode audio failed." );
+            int err = cc.encodeAudio( frame, packet, gotPacket );
+            if( err < 0 ) {
+                throw new IOException( "Encode audio failed: " + err + ": " + JavException.errStr( err ) );
             }
             if( gotPacket[0] == 0 ) {
                 continue;
@@ -287,7 +289,7 @@ public class TestEncodeMp3 {
             int len = Math.min( audio[0].length - samplePos, samps );
             for( int i = 0; i < chans; i++ ) {
                 buf.clear().limit( samps * 4 );
-                JavMem.copy( frame.extendedDataPointer( i ), buf );
+                JavMem.copy( frame.extendedDataElem( i ), buf );
                 buf.flip();
                 float[] dst = audio[i];
                 
@@ -313,7 +315,7 @@ public class TestEncodeMp3 {
         JavFrame frame = JavFrame.allocAudio( channels, 100, Jav.AV_SAMPLE_FMT_S16P, 0, null );
                 
         for( int i = 0; i < 4; i++ ) {
-            System.out.println( frame.lineSize( i ) + "\t" + frame.extendedDataPointer( i ) );
+            System.out.println( frame.lineSize( i ) + "\t" + frame.javaExtendedBufElem( i ) );
         }
     }
 

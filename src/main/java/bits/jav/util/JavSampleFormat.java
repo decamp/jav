@@ -45,13 +45,11 @@ public final class JavSampleFormat {
         return n != 0;
     }
 
-
     /**
      * @param sampleFormat the sample format
      * @return number of bytes per sample or zero if unknown for the given sample format.
      */
     public static native int getBytesPerSample( int sampleFormat );
-
 
     /**
      * Check if the sample format is planar.
@@ -60,7 +58,6 @@ public final class JavSampleFormat {
      * @return true if sample format is planar, false if interleaved.
      */
     public static native boolean isPlanar( int format );
-
 
     /**
      * Get the required nativeBuffer size for the given audio parameters.

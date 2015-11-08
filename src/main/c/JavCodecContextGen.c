@@ -348,18 +348,6 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nScenechangeThreshold
   (**(AVCodecContext**)&pointer).scenechange_threshold = val; 
 }
 
-JNIEXPORT jint JNICALL Java_bits_jav_codec_JavCodecContext_nMeMethod__J
-( JNIEnv *env, jclass clazz, jlong pointer )
-{
-  return (jint)(**(AVCodecContext**)&pointer).me_method;
-}
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nMeMethod__JI
-( JNIEnv *env, jclass clazz, jlong pointer, jint val )
-{
-  (**(AVCodecContext**)&pointer).me_method = val; 
-}
-
 JNIEXPORT jint JNICALL Java_bits_jav_codec_JavCodecContext_nMeRange__J
 ( JNIEnv *env, jclass clazz, jlong pointer )
 {
@@ -418,30 +406,6 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nContextModel__JI
 ( JNIEnv *env, jclass clazz, jlong pointer, jint val )
 {
   (**(AVCodecContext**)&pointer).context_model = val; 
-}
-
-JNIEXPORT jint JNICALL Java_bits_jav_codec_JavCodecContext_nLmin__J
-( JNIEnv *env, jclass clazz, jlong pointer )
-{
-  return (jint)(**(AVCodecContext**)&pointer).lmin;
-}
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nLmin__JI
-( JNIEnv *env, jclass clazz, jlong pointer, jint val )
-{
-  (**(AVCodecContext**)&pointer).lmin = val; 
-}
-
-JNIEXPORT jint JNICALL Java_bits_jav_codec_JavCodecContext_nLmax__J
-( JNIEnv *env, jclass clazz, jlong pointer )
-{
-  return (jint)(**(AVCodecContext**)&pointer).lmax;
-}
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nLmax__JI
-( JNIEnv *env, jclass clazz, jlong pointer, jint val )
-{
-  (**(AVCodecContext**)&pointer).lmax = val; 
 }
 
 JNIEXPORT jint JNICALL Java_bits_jav_codec_JavCodecContext_nFrameSkipThreshold__J
@@ -540,30 +504,6 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nTimecodeFrameStart__
   (**(AVCodecContext**)&pointer).timecode_frame_start = val; 
 }
 
-JNIEXPORT jfloat JNICALL Java_bits_jav_codec_JavCodecContext_nRcQmodAmp__J
-( JNIEnv *env, jclass clazz, jlong pointer )
-{
-  return (jfloat)(**(AVCodecContext**)&pointer).rc_qmod_amp;
-}
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nRcQmodAmp__JF
-( JNIEnv *env, jclass clazz, jlong pointer, jfloat val )
-{
-  (**(AVCodecContext**)&pointer).rc_qmod_amp = val; 
-}
-
-JNIEXPORT jint JNICALL Java_bits_jav_codec_JavCodecContext_nRcQmodFreq__J
-( JNIEnv *env, jclass clazz, jlong pointer )
-{
-  return (jint)(**(AVCodecContext**)&pointer).rc_qmod_freq;
-}
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nRcQmodFreq__JI
-( JNIEnv *env, jclass clazz, jlong pointer, jint val )
-{
-  (**(AVCodecContext**)&pointer).rc_qmod_freq = val; 
-}
-
 JNIEXPORT jint JNICALL Java_bits_jav_codec_JavCodecContext_nRcBufferSize__J
 ( JNIEnv *env, jclass clazz, jlong pointer )
 {
@@ -610,30 +550,6 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nRcMinRate__JI
 ( JNIEnv *env, jclass clazz, jlong pointer, jint val )
 {
   (**(AVCodecContext**)&pointer).rc_min_rate = val; 
-}
-
-JNIEXPORT jfloat JNICALL Java_bits_jav_codec_JavCodecContext_nRcBufferAggressivity__J
-( JNIEnv *env, jclass clazz, jlong pointer )
-{
-  return (jfloat)(**(AVCodecContext**)&pointer).rc_buffer_aggressivity;
-}
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nRcBufferAggressivity__JF
-( JNIEnv *env, jclass clazz, jlong pointer, jfloat val )
-{
-  (**(AVCodecContext**)&pointer).rc_buffer_aggressivity = val; 
-}
-
-JNIEXPORT jfloat JNICALL Java_bits_jav_codec_JavCodecContext_nRcInitialCplx__J
-( JNIEnv *env, jclass clazz, jlong pointer )
-{
-  return (jfloat)(**(AVCodecContext**)&pointer).rc_initial_cplx;
-}
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nRcInitialCplx__JF
-( JNIEnv *env, jclass clazz, jlong pointer, jfloat val )
-{
-  (**(AVCodecContext**)&pointer).rc_initial_cplx = val; 
 }
 
 JNIEXPORT jfloat JNICALL Java_bits_jav_codec_JavCodecContext_nRcMaxAvailableVbvUse__J

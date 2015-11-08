@@ -28,8 +28,8 @@ public class TestJavPixelFormat {
         assertEquals( "bgra", name );
         assertEquals( fmt, JavPixelFormat.get( name ) );
 
-        System.out.println( JavPixelFormat.getString( -1 ) );
-        System.out.println( JavPixelFormat.getString( fmt ) );
+        System.out.println( "%%% " + JavPixelFormat.getString( -1 ) );
+        System.out.println( "%%% " + JavPixelFormat.getString( fmt ) );
     }
 
 }

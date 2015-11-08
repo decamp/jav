@@ -204,35 +204,5 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nSampleAspectRatio__J
   c->sample_aspect_ratio = (AVRational){ num, den };
 }
 
-  
-JNIEXPORT jstring JNICALL Java_bits_jav_codec_JavCodecContext_nRcEq__J
-(JNIEnv* env, jclass clazz, jlong pointer)
-{
-  AVCodecContext* c  = *(AVCodecContext**)&pointer;
-  
-  if( c->rc_eq == NULL ) {
-    return NULL;
-  }
-  
-  return (*env)->NewStringUTF( env, c->rc_eq );
-}
-
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavCodecContext_nRcEq__JLjava_lang_String_2
-(JNIEnv* env, jclass clazz, jlong pointer, jstring rceq )
-{
-  AVCodecContext* c = *(AVCodecContext**)&pointer;
-
-  if( c->rc_eq ) {
-    av_freep( (void*)c->rc_eq );
-    c->rc_eq = NULL;
-  }
-  
-  if( rceq != NULL ) {
-    const char* cname = (*env)->GetStringUTFChars( env, rceq, NULL );
-    c->rc_eq = av_strdup( cname );
-    (*env)->ReleaseStringUTFChars( env, rceq, cname );
-  }
-}
 
   

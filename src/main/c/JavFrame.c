@@ -8,6 +8,7 @@
 #include "JavFrame.h"
 #include "JavCore.h"
 #include "libavcodec/avcodec.h"
+#include "libavutil/imgutils.h"
 
 JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nAllocFrame
 (JNIEnv* env, jclass clazz)
@@ -378,33 +379,6 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nSampleAspectRatio__JII
 }
 
 
-JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nError__JI
-(JNIEnv* env, jclass clazz, jlong pointer, jint index)
-{
-  return (**(AVFrame**)&pointer).error[index];
-}
-
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nError__JIJ
-(JNIEnv* env, jclass clazz, jlong pointer, jint index, jlong err)
-{
-  (**(AVFrame**)&pointer).error[index] = err;
-}
-
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavFrame_nErrors
-(JNIEnv* env, jclass clazz, jlong pointer, jlongArray jarr)
-{
-  AVFrame* frame = *(AVFrame**)&pointer;
-  jlong* vals = (*env)->GetLongArrayElements(env, jarr, 0);
-  int i;
-  for( i = 0; i < AV_NUM_DATA_POINTERS; i++ ) {
-    vals[i] = frame->error[i];
-  }
-  (*env)->ReleaseLongArrayElements(env, jarr, vals, 0);
-}
-
-
 JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavFrame_nBestEffortTimestamp
 (JNIEnv* env, jclass clazz, jlong pointer)
 {
@@ -456,9 +430,11 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nFillVideoFrame
 
 	if( buf ) {
 	    ref = jav_buffer_wrap_bytebuffer( env, buf, bufOff, bufLen, 0 );
-		err = avpicture_fill( (AVPicture*)pic, ref->data, pixFmt, w, h );
+		//err = avpicture_fill( (AVPicture*)pic, ref->data, pixFmt, w, h );
+		err = av_image_fill_arrays( pic->data, pic->linesize, ref->data, pixFmt, w, h, 1 );
 	} else {
-		err = avpicture_fill( (AVPicture*)pic, NULL, pixFmt, w, h );
+		//err = avpicture_fill( (AVPicture*)pic, NULL, pixFmt, w, h );
+		err = av_image_fill_arrays( pic->data, pic->linesize, NULL, pixFmt, w, h, 1 );
 	}
 
 	if( err >= 0 ) {
@@ -509,5 +485,5 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nFillAudioFrame
 JNIEXPORT jint JNICALL Java_bits_jav_codec_JavFrame_nComputeVideoBufferSize
 (JNIEnv* env, jclass clazz, jint w, jint h, jint pixelFormat)
 {
-    return avpicture_get_size(pixelFormat, w, h);
+    return av_image_get_buffer_size(pixelFormat, w, h, 1);
 }

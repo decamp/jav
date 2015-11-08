@@ -487,27 +487,8 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     public void reference( int q ) {
         nReference( mPointer, q );
     }
-        
-    /**
-     * uint64_t error[AV_NUM_DATA_POINTERS];
-     * - encoding: Set by libavcodec. if flags&CODEC_FLAG_PSNR.
-     * - decoding: unused
-     */
-    public long error( int index ) {
-        return nError( mPointer, index );
-    }
-    
-    
-    public void error( int index, long err ) {
-        nError( mPointer, index, err );
-    }
-    
-    
-    public void errors( long[] out8x1 ) {
-        nErrors( mPointer, out8x1 );
-    }
-    
-    
+
+
     public int bufferType() {
         return nType( mPointer );
     }
@@ -1163,9 +1144,6 @@ public class JavFrame extends AbstractRefable implements NativeObject {
     private static native long nMacroBlockTypePointer( long pointer );
     private static native long nMotionVectorPointer( long pointer, int dir );
     
-    private static native long nError( long pointer, int index );
-    private static native void nError( long pointer, int index, long error );
-    private static native void nErrors( long pointer, long[] out4x1 );
     private static native int  nType( long pointer );
     private static native void nType( long pointer, int type );
     private static native int  nRepeatPict( long pointer );

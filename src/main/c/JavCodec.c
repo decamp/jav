@@ -91,11 +91,11 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavCodec_nPixelFormatCount
 (JNIEnv* env, jclass clazz, jlong pointer)
 {
   AVCodec* codec = *(AVCodec**)&pointer;
-  const enum PixelFormat* p = codec->pix_fmts;
+  const enum AVPixelFormat* p = codec->pix_fmts;
   
   if( p == NULL ) {
     return 0;
-	}
+  }
     
   int i = 0;
   while( *p != -1 ) {
@@ -110,8 +110,8 @@ JNIEXPORT jint JNICALL Java_bits_jav_codec_JavCodec_nPixelFormatCount
 JNIEXPORT jint JNICALL Java_bits_jav_codec_JavCodec_nPixelFormat
 (JNIEnv* env, jclass clazz, jlong pointer, jint idx)
 {
-  AVCodec* codec            = *(AVCodec**)&pointer;
-  const enum PixelFormat* p = codec->pix_fmts;
+  AVCodec* codec              = *(AVCodec**)&pointer;
+  const enum AVPixelFormat* p = codec->pix_fmts;
   
   if( p == NULL )
     return -1;

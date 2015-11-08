@@ -38,6 +38,7 @@ for name in ${names[@]}; do
   echo "${name} --> $f1"
   cat $f0 | sed "s|^#include <jni\.h>|#include <JavaVM/jni.h>|" > $f1
   rm $f0
+  #mv $f0 $f1
 done
 
 

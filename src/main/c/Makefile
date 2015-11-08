@@ -24,17 +24,17 @@ export LIB_OUTPUT := ../../../lib
 
 export MACOSX_DEPLOYMENT_TARGET ?= 10.6
 export ARCH ?= -arch x86_64
-export SYS_ROOT ?= /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk
+export SYS_ROOT ?= `find /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs -maxdepth 1 -mindepth 1 | tail -n 1`
 
 DEBUG_CXXFLAGS := -dynamic -fPIC -fno-common -Wall -g3
 DEBUG_LDFLAGS := -dynamic -fPIC -fno-common -Wall -g3
 
-RELEASE_CXXFLAGS := -dynamic -fPIC -fno-common -O3 -Wall -Wstrict-aliasing=0
-RELEASE_CXXFLAGS := $(RELEASE_CXXFLAGS) -isysroot $(SYS_ROOT) $(ARCH)
+RELEASE_CXXFLAGS := -dynamic -fPIC -fno-common -O3 -Wall -Wstrict-aliasing=0 $(ARCH)
+#RELEASE_CXXFLAGS := $(RELEASE_CXXFLAGS) -isysroot $(SYS_ROOT)
 RELEASE_CXXFLAGS := $(RELEASE_CXXFLAGS) -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 
-RELEASE_LDFLAGS := -dynamic -fPIC -Wall 
-RELEASE_LDFLAGS := $(RELEASE_LDFLAGS) -Wl,-syslibroot,$(SYS_ROOT) $(ARCH)
+RELEASE_LDFLAGS := -dynamic -fPIC -Wall $(ARCH)
+#RELEASE_LDFLAGS := $(RELEASE_LDFLAGS) -Wl,-syslibroot,$(SYS_ROOT)
 RELEASE_LDFLAGS := $(RELEASE_LDFLAGS) -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 
 export CXXFLAGS := $(RELEASE_CXXFLAGS)

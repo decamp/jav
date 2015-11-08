@@ -774,23 +774,7 @@ public final class JavCodecContext implements JavClass {
     public void scenechangeThreshold( int thresh ) {
         nScenechangeThreshold( mPointer, thresh );
     }
-    
-    /**
-     * Motion estimation algorithm used for video coding.
-     * 1 (zero), 2 (full), 3 (log), 4 (phods), 5 (epzs), 6 (x1), 7 (hex),
-     * 8 (umh), 9 (iter), 10 (tesa) [7, 8, 10 are x264 specific, 9 is snow specific]
-     * - encoding: MUST be set by user.
-     * - decoding: unused
-     */
-    public int meMethod() {
-        return nMeMethod( mPointer );
-    }
-    
-    
-    public void meMethod( int meMethod ) {
-        nMeMethod( mPointer, meMethod );
-    }
-    
+
     /**
      * maximum motion estimation search range in subpel units
      * If 0 then no limit.
@@ -864,34 +848,6 @@ public final class JavCodecContext implements JavClass {
         nContextModel( mPointer, context_model );
     }
 
-    /**
-     * minimum Lagrange multipler
-     * - encoding: Set by user.
-     * - decoding: unused
-     */
-    public int lmin() {
-        return nLmin( mPointer );
-    }
-
-
-    public void lmin( int lmin ) {
-        nLmin( mPointer, lmin );
-    }
-    
-    /**
-     * maximum Lagrange multipler
-     * - encoding: Set by user.
-     * - decoding: unused
-     */
-    public int lmax() {
-        return nLmax( mPointer );
-    }
-
-
-    public void lmax( int lmax ) {
-        nLmax( mPointer, lmax );
-    }
-    
     /**
      * frame skip threshold
      * - encoding: Set by user.
@@ -1017,26 +973,6 @@ public final class JavCodecContext implements JavClass {
         nRcQSquint( mPointer, rc_qsquish );
     }
 
-    
-    public float rcQmodAmp() {
-        return nRcQmodAmp( mPointer );
-    }
-
-
-    public void rcQmodAmp( float rc_qmod_amp ) {
-        nRcQmodAmp( mPointer, rc_qmod_amp );
-    }
-
-
-    public int rcQmodFreq() {
-        return nRcQmodFreq( mPointer );
-    }
-
-
-    public void rcQmodFreq( int rc_qmod_freq ) {
-        nRcQmodFreq( mPointer, rc_qmod_freq );
-    }
-    
     /**
      * decoder bitstream nativeBuffer size
      * - encoding: Set by user.
@@ -1066,20 +1002,6 @@ public final class JavCodecContext implements JavClass {
     }
 
     /**
-     * rate control equation
-     * - encoding: Set by user
-     * - decoding: unused
-     */
-    private String rcEq() {
-        return nRcEq( mPointer );
-    }
-    
-    
-    private void rcEq( String rceq ) {
-        nRcEq( mPointer, rceq );
-    }
-
-    /**
      * maximum bitrate
      * - encoding: Set by user.
      * - decoding: unused
@@ -1105,30 +1027,6 @@ public final class JavCodecContext implements JavClass {
 
     public void rcMinRate( int rc_min_rate ) {
         nRcMinRate( mPointer, rc_min_rate );
-    }
-
-    
-    public float rcBufferAggressivity() {
-        return nRcBufferAggressivity( mPointer );
-    }
-
-
-    public void rcBufferAggressivity( float rc_buffer_aggressivity ) {
-        nRcBufferAggressivity( mPointer, rc_buffer_aggressivity );
-    }
-    
-    /**
-     * initial complexity for pass1 ratecontrol
-     * - encoding: Set by user.
-     * - decoding: unused
-     */
-    public float rcInitialCplx() {
-        return nRcInitialCplx( mPointer );
-    }
-
-
-    public void rcInitialCplx( float rc_initial_cplx ) {
-        nRcInitialCplx( mPointer, rc_initial_cplx );
     }
 
     /**
@@ -1281,8 +1179,6 @@ public final class JavCodecContext implements JavClass {
     private static native void   nMaxQdiff( long pointer, int max_qdiff );
     private static native int    nScenechangeThreshold( long pointer );
     private static native void   nScenechangeThreshold( long pointer, int thresh );
-    private static native int    nMeMethod( long pointer );
-    private static native void   nMeMethod( long pointer, int meMethod );
     private static native int    nMeRange( long pointer );
     private static native void   nMeRange( long pointer, int meRange );
     private static native int    nMeCmp( long pointer );
@@ -1294,10 +1190,6 @@ public final class JavCodecContext implements JavClass {
     private static native void   nCoderType( long pointer, int coder_type );
     private static native int    nContextModel( long pointer);
     private static native void   nContextModel( long pointer, int context_model );
-    private static native int    nLmin( long pointer);
-    private static native void   nLmin( long pointer, int lmin );
-    private static native int    nLmax( long pointer);
-    private static native void   nLmax( long pointer, int lmax );
     private static native int    nFrameSkipThreshold( long pointer);
     private static native void   nFrameSkipThreshold( long pointer, int frame_skip_threshold );
     private static native int    nFrameSkipFactor( long pointer);
@@ -1315,14 +1207,8 @@ public final class JavCodecContext implements JavClass {
     private static native long   nTimecodeFrameStart( long pointer);
     private static native void   nTimecodeFrameStart( long pointer, long timecode_frame_start );
     
-    private static native String nRcEq( long pointer );
-    private static native void   nRcEq( long pointer, String eq );
     private static native float  nRcQsquish( long pointer);
     private static native void   nRcQSquint( long pointer, float rc_qsquish );
-    private static native float  nRcQmodAmp( long pointer);
-    private static native void   nRcQmodAmp( long pointer, float rc_qmod_amp );
-    private static native int    nRcQmodFreq( long pointer);
-    private static native void   nRcQmodFreq( long pointer, int rc_qmod_freq );
     private static native int    nRcBufferSize( long pointer);
     private static native void   nRcBufferSize( long pointer, int rc_buffer_size );
     private static native int    nRcOverrideCount( long pointer);
@@ -1331,10 +1217,6 @@ public final class JavCodecContext implements JavClass {
     private static native void   nRcMaxRate( long pointer, int rc_max_rate );
     private static native int    nRcMinRate( long pointer);
     private static native void   nRcMinRate( long pointer, int rc_min_rate );
-    private static native float  nRcBufferAggressivity( long pointer);
-    private static native void   nRcBufferAggressivity( long pointer, float rc_buffer_aggressivity );
-    private static native float  nRcInitialCplx( long pointer);
-    private static native void   nRcInitialCplx( long pointer, float rc_initial_cplx );
     private static native float  nRcMaxAvailableVbvUse( long pointer);
     private static native void   nRcMaxAvailableVbvUse( long pointer, float rc_max_available_vbv_use );
     private static native float  nRcMinVbvOverflowUse( long pointer);

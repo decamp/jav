@@ -12,7 +12,7 @@
 JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavPacket_nAlloc
 (JNIEnv* env, jclass clazz)
 {
-  AVPacket* packet = (AVPacket*)av_mallocz( sizeof(AVPacket) );
+  AVPacket* packet = av_packet_alloc();
   av_init_packet( packet );
   return *(jlong*)&packet;
 }
@@ -30,11 +30,10 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nFree
 (JNIEnv* env, jclass clazz, jlong pointer)
 {
   AVPacket* packet = *(AVPacket**)&pointer;
-  if(packet->data) {
-    av_free_packet( packet );
-  }
-  
-  free(packet);
+  //if( packet->data ) {
+  //  av_packet_unref( packet );
+  //}
+  av_packet_free( &packet );
 }
 
 
@@ -42,9 +41,9 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nFreeData
 (JNIEnv* env, jclass clazz, jlong pointer)
 {
   AVPacket* packet = *(AVPacket**)&pointer;
-  if( packet->data ) {
-    av_free_packet( packet );
-  }
+  //if( packet->data ) {
+    av_packet_unref( packet );
+  //}
 }
 
 
@@ -52,9 +51,9 @@ JNIEXPORT int JNICALL Java_bits_jav_codec_JavPacket_nAllocData
 (JNIEnv* env, jclass clazz, jlong pointer, jint size)
 {
   AVPacket* packet = *(AVPacket**)&pointer;
-  if( packet->data ) {
-    av_free_packet( packet );
-  }
+  //if( packet->data ) {
+  //  av_free_packet( packet );
+  //}
   
   return av_new_packet( packet, size );
 }
@@ -277,19 +276,5 @@ JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nPos__JJ
 ( JNIEnv *env, jclass clazz, jlong pointer, jlong pos ) 
 {
     (**(AVPacket**)&pointer).pos = pos;
-}
-
-
-JNIEXPORT jlong JNICALL Java_bits_jav_codec_JavPacket_nConvergenceDuration__J
-( JNIEnv *env, jclass clazz, jlong pointer )
-{
-    return (**(AVPacket**)&pointer).convergence_duration;
-}
-
-
-JNIEXPORT void JNICALL Java_bits_jav_codec_JavPacket_nConvergenceDuration__JJ
-( JNIEnv *env, jclass clazz, jlong pointer, jlong cd ) 
-{
-    (**(AVPacket**)&pointer).convergence_duration = cd;
 }
 

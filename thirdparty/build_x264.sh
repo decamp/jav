@@ -54,7 +54,7 @@ for cmd in ${cmds[@]}; do
       make install-lib-shared
 
       shortName=$(gen_soname 'x264' '' )
-      longName=$(gen_soname 'x264' '.142' )
+      longName=$(gen_soname 'x264' '.148' )
       
       rm $scratch/lib/$shortName
       mv $scratch/lib/$longName $scratch/lib/$shortName

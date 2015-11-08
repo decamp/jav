@@ -80,12 +80,12 @@ public class TestSwresample {
         //packet.allocData( 1024 * 1024 );
 
         int pos = 0;
-        ByteBuffer b = frame.directBuffer();
+        ByteBuffer b = frame.javaBufElem( 0 );
         int[] gotPacket = { 0 };
 
         while( pos < audio.length ) {
             b.clear();
-            int len = Math.min( audio.length - pos, b.remaining() / 2 );
+            int len = Math.min( audio.length - pos, frameSize );
 
             for( int i = 0; i < len; i++ ) {
                 b.putShort( (short)( audio[i+pos] * Short.MAX_VALUE ) );
@@ -194,7 +194,7 @@ public class TestSwresample {
                                                  Jav.AV_SAMPLE_FMT_FLT,
                                                  sampleRate );
         JavFrame res   = JavFrame.allocAudio( chans, resampBufSize, Jav.AV_SAMPLE_FMT_FLT, 0, null );
-        ByteBuffer buf = res.directBuffer();
+        ByteBuffer buf = res.javaBufElem( 0 );
 
         while( true ) {
             if( !endOfInput ) {
