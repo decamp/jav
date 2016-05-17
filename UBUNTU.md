@@ -1,3 +1,3 @@
-1. Install unzip
-sudo apt-get install unzip
-sudo apt-get install yasm
+1. Install unzip  
+sudo apt-get install unzip  
+sudo apt-get install yasm  
